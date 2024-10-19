@@ -11,62 +11,60 @@ public class AtendeCliente extends Thread {
         //String firstWord = arr[0];
 
         switch(arr[0]) {
-            case "LOGIN":
-                if(arr.length != 3){
+            case "LOGIN": //login <email> <password>
+                if (arr.length != 3) {
                     //TODO envia mensagem como parametros incorretos
                     System.out.print("login username password - nr parametros incorreto");
                     return false;
-                }
-                else{
+                } else {
                     //TODO - verifica se existe na base de dados
                     //SQL PTSD
                 }
                 break;
 
-            case "REGISTAUTILIZADOR":
-                if(arr.length != 3){
+            case "REGISTAUTILIZADOR": //registar <nome> <telefone> <email> <password>
+                if (arr.length != 3) {
                     //TODO envia mensagem como parametros incorretos
                     System.out.print("RegistaUtilizador nome password - nr parametros incorreto");
                     return false;
-                }
-                else{
-                    //TODO - verifica se existe na base de dados
+                } else {
+                   /* //TODO - verifica se existe na base de dados (talvez deva verificar ja na funcao?)
                     if() {
                         System.out.print("Utilizador a registar já existe");
                         return false;
                     }
                     else{
                         //TODO - adiciona novo utilizador na base de dados
-                    }
+                    }*/
                 }
                 break;
 
-            case "EDITAPERFIL":
-                if(arr.length != 4){
+            case "EDITARPERFIL": //editarperfil <password> <campoAeditar> <novoValor>
+                if (arr.length != 3) {
                     //TODO envia mensagem como parametros incorretos
-                    System.out.print("EditaPerfil novoNome novaPassword passwordAtual - nr parametros incorreto");
+                    //System.out.print("EditaPerfil novoNome novaPassword passwordAtual - nr parametros incorreto");
                     return false;
                 }
                 break;
 
-            case "CRIAGRUPO":
-                if(arr.length != 2){
+            case "CRIARGRUPO": // criargrupo <novonome>
+                if (arr.length != 2) {
                     //TODO envia mensagem como parametros incorretos
                     System.out.print("criaGrupo nome - nr parametros incorreto");
                     return false;
                 }
                 break;
 
-            case "TROCAGRUPOATUAL":
-                if(arr.length != 2){
+            case "TROCARGRUPO": //trocargrupo <novogrupo>
+                if (arr.length != 2) {
                     //TODO envia mensagem como parametros incorretos
                     System.out.print("trocaGrupoAtual novoGrupo - nr parametros incorreto");
                     return false;
                 }
                 break;
 
-            case "CRIACONVITE": //criaconvite grupo
-                if(arr.length == 1){
+            case "CRIACONVITE": //criaconvite <grupo>
+                if (arr.length == 1) {
                     //TODO envia mensagem como parametros incorretos
                     System.out.print("criaConvite destinatario/s - nr parametros incorreto");
                     return false;
@@ -77,102 +75,106 @@ public class AtendeCliente extends Thread {
 
                 //TODO chamar verConvite()
 
-            case "GERECONVITE": //convite <pessoa> <resposta>
-                if(arr.length != 3){
+            case "GERECONVITE": //gereconvite <pessoa> <resposta>
+                if (arr.length != 3) {
                     //TODO envia mensagem como parametros incorretos
                     System.out.print("login username password - nr parametros incorreto");
                     return false;
                 }
                 //TODO gere(aceita/recusa) convite
 
-            case "LISTARGRUPO": //listagrupo
+            case "LISTARGRUPOS": //listagrupo
+                //TODO listar todos os grupos a que pertence o user
 
 
             case "EDITARNOMEGRUPO": //editarnomegrupo <novonome>
-                if(arr.length != 2) {
+                if (arr.length != 2) {
                     //TODO envia mensagem como parametros incorretos
                     System.out.print("login username password - nr parametros incorreto");
                     return false;
                 }
-//--------------------------------------
-
 
             case "ELIMINARGRUPO": //eliminargrupo <nome>
-                if(arr.length != 3){
+                if (arr.length != 3) {
                     //TODO envia mensagem como parametros incorretos
                     System.out.print("login username password - nr parametros incorreto");
                     return false;
                 }
-            case "SAIRGRUPO":
-                if(arr.length != 3){
-                    //TODO envia mensagem como parametros incorretos
-                    System.out.print("login username password - nr parametros incorreto");
-                    return false;
-                }
-            case "INSERIRDESPESA":
-                if(arr.length != 3){
-                    //TODO envia mensagem como parametros incorretos
-                    System.out.print("login username password - nr parametros incorreto");
-                    return false;
-                }
-            case "VERGASTOS":
-                if(arr.length != 3){
-                    //TODO envia mensagem como parametros incorretos
-                    System.out.print("login username password - nr parametros incorreto");
-                    return false;
-                }
-            case "VERHISTORICODESPESAS":
-                if(arr.length != 3){
-                    //TODO envia mensagem como parametros incorretos
-                    System.out.print("login username password - nr parametros incorreto");
-                    return false;
-                }
-            case "EXPROTARFICHEIRODESPESAS":
-                if(arr.length != 3){
-                    //TODO envia mensagem como parametros incorretos
-                    System.out.print("login username password - nr parametros incorreto");
-                    return false;
-                }
-            case "EDITARDESPESA":
-                if(arr.length != 3){
-                    //TODO envia mensagem como parametros incorretos
-                    System.out.print("login username password - nr parametros incorreto");
-                    return false;
-                }break;
+            case "SAIRGRUPO": //sairgrupo
+                //TODO sair do grupo atual (eliminar utilizador do grupo)
 
-            case "ELIMINARDESPESA":
-                if(arr.length != 3){
+            case "INSERIRDESPESA": //inserirdespesa  <grupo> <data> <descricao> <valor> <elementosPartilhados> <podem ser varios..>
+                if (arr.length < 6) {
+                    //TODO envia mensagem como parametros incorretos
+                    System.out.print("login username password - nr parametros incorreto");
+                    return false;
+                }
+            case "VERGASTOS": //vergastos <grupoConcorrente>
+                if (arr.length != 2) {
+                    //TODO envia mensagem como parametros incorretos
+                    System.out.print("login username password - nr parametros incorreto");
+                    return false;
+                }
+            case "VERHISTORICODESPESAS": //verhistoriocodespesas <grupoconcorrente>
+                if (arr.length != 2) {
+                    //TODO envia mensagem como parametros incorretos
+                    System.out.print("login username password - nr parametros incorreto");
+                    return false;
+                }
+            case "EXPROTARDESPESAS": //exportardespesas <grupoconcorrente>
+                if (arr.length != 2) {
+                    //TODO envia mensagem como parametros incorretos
+                    System.out.print("login username password - nr parametros incorreto");
+                    return false;
+                }
+                //TODO envia lista de despesas, cliente faz a logica de exportacao para ficheiro ?
+
+            case "EDITARDESPESA": //editardespesa <campoAeditar> <novoValor>
+                if (arr.length != 3) {
                     //TODO envia mensagem como parametros incorretos
                     System.out.print("login username password - nr parametros incorreto");
                     return false;
                 }
                 break;
 
-            case "INSERIRPAGAMENTO":
-                if(arr.length != 4){
+            case "ELIMINARDESPESA": //eliminardespesa <nome> (algo q identifique a despesa...)
+                if (arr.length != 2) {
+                    //TODO envia mensagem como parametros incorretos
+                    System.out.print("login username password - nr parametros incorreto");
+                    return false;
+                }
+                break;
+
+            case "INSERIRPAGAMENTO": // inserirpagamento <quemPagou> <quemrecebeu> <data> <valor>
+                if (arr.length != 5) {
                     //TODO envia mensagem como parametros incorretos
                     System.out.print("inserePagamento grupo pagamento valor - nr parametros incorreto");
                     return false;
                 }
                 break;
 
-            case "LISTARPAGAMENTO":
+            case "LISTARPAGAMENTOS":
 
                 break;
-            case "ELIMINAPAGAMENTO":
-                if(arr.length != 2){
+
+            case "ELIMINAPAGAMENTO": //eliminapagamento <nome> (algo q identifique pagamento)
+                if (arr.length != 2) {
                     //TODO envia mensagem como parametros incorretos
                     System.out.print("eliminaPagamento cliente - nr parametros incorreto");
                     return false;
                 }
                 break;
 
-            case "VERSALDO":
+            case "VERSALDO": //versaldo <grupoconcorrente>
+                if (arr.length != 2) {
+                    //TODO envia mensagem como parametros incorretos
+                    System.out.print("eliminaPagamento cliente - nr parametros incorreto");
+                    return false;
+                } else {
 
+                }
                 break;
         }
-        //verconvites
-        VerConvites(new MSG(comando, false));
 
         return true;
     }
