@@ -1,0 +1,93 @@
+Msg
+//=========//
+Grupo
+	saldo
+Convite
+//=========//
+Pagamento
+//=========//
+Despesas
+	nome grupo
+	data
+	descrição
+	valor
+ 	quem pagou 
+	e os elementos com quem é partilhada (pode não incluir quem pagou);
+//=========//
+ClienteUI
+	-ApresentaVista
+Cliente
+	Variáveis:
+		- username
+		- password
+	Comandos:
+	Não autenticado:
+		- RegistaNovoUser
+		- Login
+	Autenticado:
+		- EditaPerfil
+		- CriaGrupo
+		- TrocaGrupoAtual
+		- CriaConvite
+		- VerConvites
+		- AceiaConvite
+		- ListaGrupo
+		- EditaNomeGrupo
+		- EliminaGrupo
+		- SairGrupo
+		- InsereDespesa
+		- EditaDespesa
+		- VerGastos
+		- VerHistoricoDespesas
+		- ExportaFichDespesas
+		- PagarDespesa
+		- PagaOutroCliente
+		- VerPagamentosGrupo
+		- EliminaPagamento
+		- VerSaldo
+		- Logout
+//=========//		
+Servidor
+	Main:
+        - Aceita cliente
+		-DisconectaCliente (Quando a autenticação falha ou as credenciais não são enviadas no espaço de 60 
+segundos)
+        Thread:
+	- Atende Cliente
+		- EditaPerfil
+		- CriaGrupo
+		- TrocaGrupoAtual
+		- CriaConvite
+		- VerConvites
+		- AceiaConvite
+		- ListaGrupo
+		- EditaNomeGrupo
+		- EliminaGrupo
+		- SairGrupo
+		- InsereDespesa
+		- EditaDespesa
+		- VerGastos
+		- VerHistoricoDespesas
+		- ExportaFichDespesas
+		- PagarDespesa
+		- PagaOutroCliente
+		- VerPagamentosGrupo
+		- EliminaPagamento
+		- VerSaldo
+		- Logout
+		- EnviaMsgCliente
+	- CriaBaseDados (se não existir no arranque)
+	-ShutDown
+	
+	-Heartbeat (cada 10s / alteração base dados)
+		- número de versão atual da 
+sua base dados local 
+		- porto de escuta TCP automático no qual aguarda pedidos de 
+ligação de servidores de backup para obtenção de uma cópia integral da base de 
+dados
+		- atualiza verão na tabela SQL
+//=========//
+ServidorBackup
+	Thread:
+		- AguardaHeartbeat (30 secs max)
+	-ShutDown
