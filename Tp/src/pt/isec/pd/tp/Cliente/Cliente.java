@@ -10,6 +10,7 @@ import java.net.*;
 //TODO - Tirar quando não for necessário
 import java.util.Calendar;
 import java.util.Objects;
+import java.util.Scanner;
 
 public class Cliente {
 
@@ -103,6 +104,35 @@ public class Cliente {
                 response = (Calendar) in.readObject();
 
                 System.out.println("Resposta: " + response.getTime());
+
+                Scanner input = new Scanner(System.in);
+                int opcao;
+                do {
+                    System.out.println("Escolha uma opção:");
+                    System.out.println("1. Autenticação");
+                    System.out.print("2. Registo\n->");
+
+                    opcao = input.nextInt();
+
+                    if (opcao != 1 && opcao != 2) {
+                        System.out.println("Opcao invalida. Por favor escolha 1 ou 2");
+                    }
+                    input.nextLine();
+
+                } while (opcao != 1 && opcao != 2);
+
+                System.out.println("Nome: ");
+                String nome = input.nextLine();
+                System.out.println("Password: ");
+                String pass = input.nextLine();
+                System.out.println(nome + ", " + pass);
+
+                if(opcao == 1) {
+                    //TODO - enviar ao server como login
+                }
+                else{
+                    //TODO - enviar ao server como register
+                }
             }
         } catch (UnknownHostException e) {
             System.out.println("Destino desconhecido:\n\t" + e);
