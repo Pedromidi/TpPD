@@ -7,7 +7,6 @@ import java.util.List;
 
 public class Grupo {
     float saldo;
-
     private String nome;
     private List<Cliente> membros;
     private List<Despesa> despesas;

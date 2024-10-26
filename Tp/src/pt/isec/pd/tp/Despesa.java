@@ -5,6 +5,7 @@ import pt.isec.pd.tp.Cliente.Cliente;
 import java.util.List;
 
 public class Despesa {
+    private int id;
     private String descricao;
     private double valor;
     private Cliente pagador; //provalvelmente não
