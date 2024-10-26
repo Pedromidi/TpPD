@@ -3,6 +3,7 @@ package pt.isec.pd.tp;
 import pt.isec.pd.tp.Cliente.Cliente;
 
 public class Pagamento {
+    private int id;
     private Cliente pagador;
     private Cliente receptor;
     private double valor;
