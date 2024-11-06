@@ -64,9 +64,4 @@ public class Cliente {
         return "Utilizador{" + "nome='" + nome + '\'' +
                 ", email='" + email + '\'' + ", telefone='";
     }
-
-    public Boolean enviaComando(String comando){
-        //TODO enviar string ao servidor, servidor verifica e devolve resposta
-        return true;
-    }
 }

@@ -2,31 +2,74 @@ package pt.isec.pd.tp.Servidores;
 
 import pt.isec.pd.tp.MSG;
 
-public class AtendeCliente extends Thread {
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.net.Socket;
 
-    public boolean VerificaComando(String comando){
+public class AtendeCliente implements Runnable {
+    Socket clientSocket;
+
+    public AtendeCliente(Socket clientSocket) {
+        this.clientSocket = clientSocket;
+    }
+
+    @Override
+    public void run() {
+        String comando;
+
+        try (ObjectInputStream oin = new ObjectInputStream(clientSocket.getInputStream());
+             ObjectOutputStream oout = new ObjectOutputStream(clientSocket.getOutputStream())) {
+
+            // a)
+            // [PT] Deserializar o objecto recebido
+            // [EN] Deserialize the received object
+            while(true) {
+                comando = (String) oin.readObject();
+                System.out.println("Recebido \"" + comando + "\" de " + clientSocket.getInetAddress().getHostAddress() + ":" + clientSocket.getPort());
+
+                // b)
+                // [PT] Sair da thread se o pedido recebido for diferente do valor dado pela variável Server.TIME_REQUEST
+                // [EN] Exit the thread if the request received is different from the value given by the Server.TIME_REQUEST variable
+                /*if (!request.equalsIgnoreCase(Server.TIME_REQUEST)) {
+                    return;
+                }*/
+
+                // c)
+                // [PT] Serializar o objecto do tipo Time
+                // [EN] Serialize the object of type Time
+                String res = VerificaComando(comando);
+                oout.writeObject(res);
+                oout.flush();
+            }
+        } catch (IOException | ClassNotFoundException e) {
+            System.out.println("Problema na comunicacao com o cliente " + clientSocket.getInetAddress().getHostAddress() + ":" + clientSocket.getPort() + "\n\t" + e);
+        }
+    }
+
+    public String VerificaComando(String comando){
         //login
         comando = comando.toUpperCase();
         String arr[] = comando.split(" ");
         //String firstWord = arr[0];
 
         switch(arr[0]) {
-            case "LOGIN": //login <email> <password>
+            case "1": //login <email> <password>
                 if (arr.length != 3) {
                     //TODO envia mensagem como parametros incorretos
                     System.out.print("login username password - nr parametros incorreto");
-                    return false;
+                    return "login username password - nr parametros incorreto";
                 } else {
                     //TODO - verifica se existe na base de dados
                     //SQL PTSD
+                    return "recebi comando login";
                 }
-                break;
 
             case "REGISTAUTILIZADOR": //registar <nome> <telefone> <email> <password>
                 if (arr.length != 3) {
                     //TODO envia mensagem como parametros incorretos
                     System.out.print("RegistaUtilizador nome password - nr parametros incorreto");
-                    return false;
+                    return "RegistaUtilizador nome password - nr parametros incorreto";
                 } else {
                    /* //TODO - verifica se existe na base de dados (talvez deva verificar ja na funcao?)
                     if() {
@@ -42,8 +85,8 @@ public class AtendeCliente extends Thread {
             case "EDITARPERFIL": //editarperfil <password> <campoAeditar> <novoValor>
                 if (arr.length != 3) {
                     //TODO envia mensagem como parametros incorretos
-                    //System.out.print("EditaPerfil novoNome novaPassword passwordAtual - nr parametros incorreto");
-                    return false;
+                    System.out.print("EditaPerfil novoNome novaPassword passwordAtual - nr parametros incorreto");
+                    return "EditaPerfil novoNome novaPassword passwordAtual - nr parametros incorreto";
                 }
                 break;
 
@@ -51,7 +94,7 @@ public class AtendeCliente extends Thread {
                 if (arr.length != 2) {
                     //TODO envia mensagem como parametros incorretos
                     System.out.print("criaGrupo nome - nr parametros incorreto");
-                    return false;
+                    return "criaGrupo nome - nr parametros incorreto";
                 }
                 break;
 
@@ -59,7 +102,7 @@ public class AtendeCliente extends Thread {
                 if (arr.length != 2) {
                     //TODO envia mensagem como parametros incorretos
                     System.out.print("trocaGrupoAtual novoGrupo - nr parametros incorreto");
-                    return false;
+                    return "trocaGrupoAtual novoGrupo - nr parametros incorreto";
                 }
                 break;
 
@@ -67,7 +110,7 @@ public class AtendeCliente extends Thread {
                 if (arr.length == 1) {
                     //TODO envia mensagem como parametros incorretos
                     System.out.print("criaConvite destinatario/s - nr parametros incorreto");
-                    return false;
+                    return "criaConvite destinatario/s - nr parametros incorreto";
                 }
                 break;
 
@@ -79,7 +122,7 @@ public class AtendeCliente extends Thread {
                 if (arr.length != 3) {
                     //TODO envia mensagem como parametros incorretos
                     System.out.print("login username password - nr parametros incorreto");
-                    return false;
+                    return "login username password - nr parametros incorreto";
                 }
                 //TODO gere(aceita/recusa) convite
 
@@ -91,14 +134,13 @@ public class AtendeCliente extends Thread {
                 if (arr.length != 2) {
                     //TODO envia mensagem como parametros incorretos
                     System.out.print("login username password - nr parametros incorreto");
-                    return false;
+                    return "login username password - nr parametros incorreto";
                 }
 
             case "ELIMINARGRUPO": //eliminargrupo <nome>
                 if (arr.length != 3) {
                     //TODO envia mensagem como parametros incorretos
                     System.out.print("login username password - nr parametros incorreto");
-                    return false;
                 }
             case "SAIRGRUPO": //sairgrupo
                 //TODO sair do grupo atual (eliminar utilizador do grupo)
@@ -107,25 +149,21 @@ public class AtendeCliente extends Thread {
                 if (arr.length < 6) {
                     //TODO envia mensagem como parametros incorretos
                     System.out.print("login username password - nr parametros incorreto");
-                    return false;
                 }
             case "VERGASTOS": //vergastos <grupoConcorrente>
                 if (arr.length != 2) {
                     //TODO envia mensagem como parametros incorretos
                     System.out.print("login username password - nr parametros incorreto");
-                    return false;
                 }
             case "VERHISTORICODESPESAS": //verhistoriocodespesas <grupoconcorrente>
                 if (arr.length != 2) {
                     //TODO envia mensagem como parametros incorretos
                     System.out.print("login username password - nr parametros incorreto");
-                    return false;
                 }
             case "EXPROTARDESPESAS": //exportardespesas <grupoconcorrente>
                 if (arr.length != 2) {
                     //TODO envia mensagem como parametros incorretos
                     System.out.print("login username password - nr parametros incorreto");
-                    return false;
                 }
                 //TODO envia lista de despesas, cliente faz a logica de exportacao para ficheiro ?
 
@@ -133,7 +171,6 @@ public class AtendeCliente extends Thread {
                 if (arr.length != 3) {
                     //TODO envia mensagem como parametros incorretos
                     System.out.print("login username password - nr parametros incorreto");
-                    return false;
                 }
                 break;
 
@@ -141,7 +178,6 @@ public class AtendeCliente extends Thread {
                 if (arr.length != 2) {
                     //TODO envia mensagem como parametros incorretos
                     System.out.print("login username password - nr parametros incorreto");
-                    return false;
                 }
                 break;
 
@@ -149,7 +185,6 @@ public class AtendeCliente extends Thread {
                 if (arr.length != 5) {
                     //TODO envia mensagem como parametros incorretos
                     System.out.print("inserePagamento grupo pagamento valor - nr parametros incorreto");
-                    return false;
                 }
                 break;
 
@@ -161,7 +196,6 @@ public class AtendeCliente extends Thread {
                 if (arr.length != 2) {
                     //TODO envia mensagem como parametros incorretos
                     System.out.print("eliminaPagamento cliente - nr parametros incorreto");
-                    return false;
                 }
                 break;
 
@@ -169,14 +203,12 @@ public class AtendeCliente extends Thread {
                 if (arr.length != 2) {
                     //TODO envia mensagem como parametros incorretos
                     System.out.print("eliminaPagamento cliente - nr parametros incorreto");
-                    return false;
                 } else {
 
                 }
                 break;
         }
-
-        return true;
+        return "";
     }
 
     //Edição dos dados de registo
