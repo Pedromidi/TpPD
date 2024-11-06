@@ -30,7 +30,48 @@ public class Servidor {
         }
     }
 
-    public static void main(String[] args) throws UnknownHostException {
+    public static void main(String[] args) {
+        ServerSocket serverSocket;
+        int listeningPort;
+
+        if (args.length != 1) {
+            System.out.println("Sintaxe: java Servidor listeningPort");
+            return;
+        }
+
+        try {
+            // d)
+            // [PT] Popular as variáveis com os valores dos args
+            // [EN] Populate variables with the arg values
+            listeningPort = Integer.parseInt(args[0]);
+            serverSocket = new ServerSocket(listeningPort);
+
+            System.out.println("TCP Message Server iniciado...");
+
+            while (true) {
+                // e)
+                // [PT] Escuta uma ligação a ser feita ao socket e aceita-a
+                // [EN] Listens for a connection to be made to this socket and accepts it
+                Socket clientSocket = serverSocket.accept();
+
+                // f)
+                // [PT] Criar e iniciar a thread que vai processar/atender cada cliente
+                // [EN] Create and start the thread that will process/attend each client
+                Runnable clientThread = new AtendeCliente(clientSocket);
+                Thread t = new Thread(clientThread);
+                t.start();
+            }
+        } catch (NumberFormatException e) {
+            System.out.println("O porto de escuta deve ser um inteiro positivo.");
+        } catch (SocketException e) {
+            System.out.println("Ocorreu um erro ao nivel do serverSocket TCP:\n\t" + e);
+        } catch (IOException e) {
+            System.out.println("Ocorreu um erro no acesso ao serverSocket:\n\t" + e);
+        }
+    }
+
+    //main original
+    /*public static void main(String[] args) throws UnknownHostException {
         int listeningPort;
         String receivedMsg;
 
@@ -78,5 +119,5 @@ public class Servidor {
         } catch(ClassNotFoundException e){
             System.out.println("O objecto recebido não é do tipo esperado:\n\t"+e);
         }
-    }
+    }*/
 }
