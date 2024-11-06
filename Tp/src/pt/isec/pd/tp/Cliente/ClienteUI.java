@@ -16,17 +16,19 @@ public class ClienteUI {
     public static final String TIME_REQUEST = "TIME";
     public static final int TIMEOUT = 10;
 
-    public static Boolean enviaComando(String comando, ObjectInputStream in, ObjectOutputStream out) throws IOException, ClassNotFoundException {
+    public static String enviaComando(String comando, ObjectInputStream in, ObjectOutputStream out) throws IOException, ClassNotFoundException {
         //TODO enviar string ao servidor, servidor verifica e devolve resposta
         out.writeObject(comando);
         String response = (String) in.readObject();
-        System.out.println("Resposta: " + response);
-        return true;
+        //System.out.println("Server:\n" + response);
+        return ("Server:\n" + response);
     }
 
     public static void main(String[] args) {
         InetAddress serverAddr;
         int serverPort;
+        String command;
+        String res;
 
         if (args.length != 2) {
             System.out.println("Sintaxe: java Client serverAddress serverPort");
@@ -50,13 +52,13 @@ public class ClienteUI {
                 ObjectInputStream in = new ObjectInputStream(socket.getInputStream());
                 String response = (String) in.readObject();
 
-                System.out.println("Resposta: " + response);
+                System.out.println("Server:\n" + response);
 
                 Scanner input = new Scanner(System.in);
                 int opcao;
                 do {
-                    System.out.println("Escolha uma opção:");
-                    System.out.println("1. Autenticação");
+                    System.out.println("Escolha uma opcao:");
+                    System.out.println("1. Autenticacao");
                     System.out.print("2. Registo\n> ");
 
                     opcao = input.nextInt();
@@ -69,15 +71,18 @@ public class ClienteUI {
                 } while (opcao != 1 && opcao != 2);
 
                 if (opcao == 1) {
-                    System.out.print("Nome: ");
-                    String nome = input.next();
-                    System.out.print("Password: ");
-                    String pass = input.next();
-                    System.out.println(nome + ", " + pass);
+                    do {
+                        System.out.print("Nome: ");
+                        String nome = input.next();
+                        System.out.print("Password: ");
+                        String pass = input.next();
 
-                    String command = "1 " + nome + " " + pass;
-                    //TODO - enviar ao server como login
-                    enviaComando(command, in, out);
+                        //Envia comando login ao servidor - Codigo 1
+                        command = "1 " + nome + " " + pass;
+                        res = enviaComando(command, in, out);
+                        System.out.println(res);
+
+                    }while(res.equals("Login aceite"));
                 } else {
                     System.out.print("Nome: ");
                     String nome = input.next();

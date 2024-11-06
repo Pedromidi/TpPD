@@ -55,15 +55,8 @@ public class AtendeCliente implements Runnable {
 
         switch(arr[0]) {
             case "1": //login <email> <password>
-                if (arr.length != 3) {
-                    //TODO envia mensagem como parametros incorretos
-                    System.out.print("login username password - nr parametros incorreto");
-                    return "login username password - nr parametros incorreto";
-                } else {
-                    //TODO - verifica se existe na base de dados
-                    //SQL PTSD
-                    return "recebi comando login";
-                }
+                    //TODO - verificar se existe na base de dados
+                    return "Login aceite";
 
             case "REGISTAUTILIZADOR": //registar <nome> <telefone> <email> <password>
                 if (arr.length != 3) {
