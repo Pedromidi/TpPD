@@ -21,7 +21,7 @@ public class ClienteUI {
         out.writeObject(comando);
         String response = (String) in.readObject();
         //System.out.println("Server:\n" + response);
-        return ("Server:\n" + response);
+        return ("Server:" + response);
     }
 
     public static void main(String[] args) {
@@ -42,32 +42,34 @@ public class ClienteUI {
             try (Socket socket = new Socket(serverAddr, serverPort)) {
                 socket.setSoTimeout(TIMEOUT * 1000);
 
-                // a)
-                // [PT] Serializar o objecto do tipo String TIME_REQUEST para o OutputStream disponibilizado pelo socket
+                //Serializar o objecto do tipo String TIME_REQUEST para o OutputStream disponibilizado pelo socket
                 ObjectOutputStream out = new ObjectOutputStream(socket.getOutputStream());
                 out.writeObject("Hello - cliente");
                 out.flush();
-                // b)
-                // [PT] Deserializa o objecto do tipo Calendar recebido no InputStream disponibilizado pelo socket
+
+                //Deserializa o objecto do tipo Calendar recebido no InputStream disponibilizado pelo socket
                 ObjectInputStream in = new ObjectInputStream(socket.getInputStream());
                 String response = (String) in.readObject();
 
                 System.out.println("Server:\n" + response);
 
                 Scanner input = new Scanner(System.in);
-                int opcao;
+                int opcao = 0;
+
+                System.out.println("Escolha uma opcao:");
+                System.out.println("1. Autenticacao");
+                System.out.print("2. Registo\n> ");
                 do {
-                    System.out.println("Escolha uma opcao:");
-                    System.out.println("1. Autenticacao");
-                    System.out.print("2. Registo\n> ");
+                    try{
+                        opcao = input.nextInt();
 
-                    opcao = input.nextInt();
-
-                    if (opcao != 1 && opcao != 2) {
-                        System.out.println("Opcao invalida. Por favor escolha 1 ou 2");
+                        if (opcao != 1 && opcao != 2) { // se a excecao for lancada este if n é executado (acho...)
+                            System.out.print("Opcao invalida. Por favor escolha 1 ou 2\n> ");
+                        }
+                    }catch (InputMismatchException e){
+                        System.out.print("Opcao invalida. Por favor escolha 1 ou 2\n> ");
+                        input.nextLine();
                     }
-                    input.nextLine();
-
                 } while (opcao != 1 && opcao != 2);
 
                 if (opcao == 1) {
@@ -83,20 +85,33 @@ public class ClienteUI {
                         System.out.println(res);
 
                     }while(res.equals("Login aceite"));
+
                 } else {
+                    System.out.print("Email: ");
+                    String email = input.next();
                     System.out.print("Nome: ");
                     String nome = input.next();
                     System.out.print("Numero de Telefone: ");
-                    String telefone = input.next();
-                    System.out.print("Email: ");
-                    String email = input.next();
+                    int telefone = 0;
+                    do {
+                        try{
+                            telefone = input.nextInt();
+
+                        }catch (InputMismatchException e){
+                            System.out.print("Telefone invalido. Tente novamente\n> ");
+                            input.nextLine();
+                        }
+                    } while (telefone == 0);
+
                     System.out.print("Password: ");
                     String password = input.next();
 
-                    //TODO - enviar ao server como register
+                    //enviar ao server como register - Codigo 2
+                    command = "2 " + email + " " + nome + " " + telefone+ " " + password;
+                    res = enviaComando(command, in, out);
+                    System.out.println(res);
                 }
 
-                //TODO - se receber resposta positiva do servidor quanto ao login/registo
                 do {
 
                     System.out.println("\n\nEscolha uma opção:");
@@ -121,144 +136,274 @@ public class ClienteUI {
                     System.out.println("18. Listar pagamentos efetuados");
                     System.out.println("19. Eliminar pagamento efetuado");
                     System.out.println("20. Ver saldos do grupo");
-                    System.out.println("21. Logout\n> "); // nao precisa de selecionar grupo atual
+                    System.out.print("21. Logout\n> "); // nao precisa de selecionar grupo atual
 
-                    int option = input.nextInt();
+                    int option = 0;
+                    do{
+                        try{
+                            option = input.nextInt();
+
+                            if (option <= 1 || option >=21) { // se a excecao for lancada este if n é executado (acho...)
+                                System.out.print("Opcao invalida. Por favor escolha novamente\n> ");
+                            }
+                        }catch (InputMismatchException e){
+                            System.out.print("Opcao invalida. Por favor escolha novamente\n> ");
+                            input.nextLine();
+                        }
+                    }while (option < 1 || option >21);
+
 
                     switch (option) {
-                        case 1: {
-                            System.out.println("\nConfirme a sua password\n> ");
-                            String password = input.next();
-                            //TODO pedir ao servidor confirmacao da pass
+                        case 1 -> {
+                            System.out.println("\nEscolha o campo a editar:");
+                            System.out.println("1. Editar nome");
+                            System.out.println("2. Editar numero de telefone");
+                            System.out.println("3. Editar email");
+                            System.out.println("4. Editar password");
+                            System.out.print("5. Cancelar\n> ");
 
-                            //resposta positiva do servidor
-                            int escolha;
-                            do {
-                                System.out.println("\nEscolha o campo a editar:");
+                            int escolha = 0;
+                            do{
+                                try{
+                                    escolha = input.nextInt();
 
-                                System.out.println("1. Editar nome");
-                                System.out.println("2. Editar numero de telefone");
-                                System.out.println("3. Editar email");
-                                System.out.println("4. Editar password");
-                                System.out.println("5. Cancelar\n> ");
-                                escolha = input.nextInt();
-
-                                if (escolha < 1 || escolha > 5) System.out.println("\nEscolha invalida");
+                                    if (escolha < 1 || escolha > 5) { // se a excecao for lancada este if n é executado (acho...)
+                                        System.out.print("Escolha invalida. Por favor escolha novamente\n> ");
+                                    }
+                                }catch (InputMismatchException e){
+                                    System.out.print("Escolha invalida. Por favor escolha novamente\n> ");
+                                    input.nextLine();
+                                }
                             } while (escolha < 1 || escolha > 5);
 
                             if (escolha == 5) break;
 
                             System.out.print("\nNovo dado: ");
                             String novoCampo = input.next();
-                            //TODO enviar ao servidor -> comando campo novoCampo
+
+                            System.out.print("\nConfirme a sua password:  ");
+                            String password = input.next();
+
+                            //enviar ao server como mundanca de campo - Codigo 3
+                            command = "3 " + escolha + " " + novoCampo + " " + password;
+                            res = enviaComando(command, in, out);
+                            System.out.println(res);
                         }
-                        case 2: {
+                        case 2 -> {
                             System.out.print("\nNome do novo grupo: ");
                             String novo = input.next();
-                            //TODO enviar ao servidor -> comando novoGrupo
+
+                            //enviar ao server como mundanca de nome de grupo - Codigo 4
+                            command = "4 " + novo;
+                            res = enviaComando(command, in, out);
+                            System.out.println(res);
                         }
-                        case 3: {
+                        case 3 -> {
                             System.out.print("\nNome do grupo: ");
                             String novo = input.next();
-                            //TODO enviar ao servidor -> comando novoGrupo
+
+                            //enviar ao server como selecao de grupo - Codigo 5
+                            command = "5 " + novo;
+                            res = enviaComando(command, in, out);
+                            System.out.println(res);
                         }
-                        case 4: {
+                        case 4 -> {
                             System.out.print("\nEmail do destinatário: ");
-                            String novo = input.next();
-                            //TODO enviar ao servidor -> comando email
+                            String email = input.next();
+
+                            //enviar ao server como criacao de novo convite - Codigo 6
+                            command = "6 " + email;
+                            res = enviaComando(command, in, out);
+                            System.out.println(res);
                         }
-                        case 5: {
-                            //TODO pedir ao servidor convites deste cliente
+                        case 5 -> {
+                            //enviar ao server como mostrar convites - Codigo 7
+                            command = "7 ";
+                            res = enviaComando(command, in, out);
+                            System.out.println(res);
                         }
-                        case 6: {
+                        case 6 -> {
                             System.out.print("\nId do convite: "); //convites teem id? ou é so o nome do grupo. é possivel receber dois convites do mesmo grupo?
-                            String convite = input.next();
-                            int campo;
+                            int id = -1;
                             do {
-                                System.out.println("Escolha o que fazer com o convite: ");
+                                try{
+                                    id = input.nextInt();
+                                }catch (InputMismatchException e){
+                                    System.out.print("Id invalido. Tente novamente\n> ");
+                                    input.nextLine();
+                                }
+                            } while (id < 0);
 
-                                System.out.println("\n1. Aceitar");
-                                System.out.println("2. Recusar");
-                                System.out.println("3. Cancelar\n> ");
-                                campo = input.nextInt();
+                            System.out.println("Escolha o que fazer com o convite: ");
 
-                                if (campo < 1 || campo > 3) System.out.println("Escolha invalida");
+                            System.out.println("\n1. Aceitar");
+                            System.out.println("2. Recusar");
+                            System.out.print("3. Cancelar\n> ");
 
-                            } while (campo < 1 || campo > 3);
+                            int escolha = 0;
+                            do{
+                                try{
+                                    escolha = input.nextInt();
 
-                            if (campo == 3) break;
+                                    if (escolha < 1 || escolha > 3) { // se a excecao for lancada este if n é executado
+                                        System.out.print("Escolha invalida. Por favor escolha novamente\n> ");
+                                    }
+                                }catch (InputMismatchException e){
+                                    System.out.print("Escolha invalida. Por favor escolha novamente\n> ");
+                                    input.nextLine();
+                                }
+                            }while (escolha < 1 || escolha > 3);
 
-                            //TODO enviar ao servidor -> comando convite resposta
+                            if (escolha == 3) break;
+
+                            //enviar ao server como criacao de novo convite - Codigo 8
+                            command = "8 " + id + " " + escolha;
+                            res = enviaComando(command, in, out);
+                            System.out.println(res);
                         }
-                        case 7: {
-                            //TODO pedir ao servidor grupos deste cliente
+                        case 7 -> {
+                            //enviar ao server como listar grupos - Codigo 9
+                            command = "9";
+                            res = enviaComando(command, in, out);
+                            System.out.println(res);
                         }
-                        case 8: {
+                        case 8 -> {
                             System.out.print("\nNovo nome do grupo: ");
                             String novo = input.next();
-                            //TODO enviar ao servidor -> comando novoNome
+
+                            //enviar ao server como edicao do nome do grupo - Codigo 10
+                            command = "10 " + novo;
+                            res = enviaComando(command, in, out);
+                            System.out.println(res);
                         }
-                        case 9: {
-                            //TODO pedir ao servidor eleminacao do grupo atual deste cliente
+                        case 9 -> {
+                            System.out.print("\nNome do grupo a eliminar: ");
+                            String novo = input.next();
+
+                            //enviar ao server como eliminar grupo - Codigo 9
+                            command = "11 " + novo;
+                            res = enviaComando(command, in, out);
+                            System.out.println(res);
                         }
-                        case 10: {
-                            //TODO pedir ao servidor saida do grupo atual deste cliente
+                        case 10 -> {
+                            System.out.print("\nNome do grupo: ");
+                            String novo = input.next();
+
+                            //enviar ao server como sair de grupo - Codigo 9
+                            command = "12 " + novo;
+                            res = enviaComando(command, in, out);
+                            System.out.println(res);
                         }
-                        case 11: {
+                        case 11 -> {
+
+                            System.out.print("Valor: ");
+                            float valor = -1;
+                            do {
+                                try{
+                                    valor = input.nextFloat();
+                                }catch (InputMismatchException e){
+                                    System.out.print("Valor invalido. Tente novamente\n> ");
+                                    input.nextLine();
+                                }
+                            } while (valor < 0);
+
                             System.out.print("Data (dd/mm/aa): ");
                             String data = input.next();
-                            System.out.print("Descricao: ");
-                            String descricao = input.next();
-                            System.out.print("Valor: ");
-                            String valor = input.next();
                             System.out.print("Quem pagou: ");
                             String quem = input.next();
-                            System.out.print("Elementos a partilhar (<nome> <nome> ...): ");
-                            String comQuem = input.next();
+                            System.out.print("Elementos a partilhar (<email> <email> ...): ");
+                            String comQuem = input.nextLine();
+                            System.out.print("Descricao: ");
+                            String descricao = input.nextLine();
 
-                            //TODO enviar ao servidor -> comando data descricao valor quem comQuem
+                            //enviar ao server como nova despesa - Codigo 9
+                            command = "13 " + valor + " " + data + " " + quem + " ;" + comQuem + ";" + descricao;
+
+                            res = enviaComando(command, in, out);
+                            System.out.println(res);
                         }
-                        case 12: {
-                            //TODO pedir ao servidor valor total dos gastos do grupo atual deste cliente
+                        case 12 -> {
+                            //enviar ao server como ver valor das despesas- Codigo 9
+                            command = "14";
+                            res = enviaComando(command, in, out);
+                            System.out.println(res);
                         }
-                        case 13: {
-                            //TODO pedir ao servidor historico de despesas do grupo atual deste cliente
+                        case 13 -> {
+                            //enviar ao server como ver historico das despesas- Codigo 15
+                            command = "15";
+                            res = enviaComando(command, in, out);
+                            System.out.println(res);
                         }
-                        case 14: {
-                            //TODO pedir ao servidor para exportar despesas do grupo atual deste cliente
+                        case 14 -> {
+                            //enviar ao server como exportar historico das despesas- Codigo 16
+                            command = "16";
+                            res = enviaComando(command, in, out);
+                            System.out.println(res);
                         }
-                        case 15: {
+                        case 15 -> {
                             System.out.print("Id da despesa: ");
-                            String comQuem = input.next();
-
-                            int campo;
+                            int id = -1;
                             do {
-                                System.out.print("\nParametro a editar: ");
+                                try{
+                                    id = input.nextInt();
+                                }catch (InputMismatchException e){
+                                    System.out.print("Id invalido. Tente novamente\n> ");
+                                    input.nextLine();
+                                }
+                            } while (id < 0);
 
-                                System.out.println("1. Data (dd/mm/aa) ");
-                                System.out.println("2. Descricao ");
-                                System.out.println("3. Valor ");
-                                System.out.println("4. Quem pagou ");
-                                System.out.println("5. Elementos partilhados (<nome> <nome> ...) ");
-                                System.out.println("6. Cancelar\n> ");
-                                campo = input.nextInt();
+                            System.out.println("\nParametro a editar: ");
 
-                                if (campo < 1 || campo > 6) System.out.println("\nEscolha invalida");
+                            System.out.println("1. Data (dd/mm/aa) ");
+                            System.out.println("2. Descricao ");
+                            System.out.println("3. Valor ");
+                            System.out.println("4. Quem pagou ");
+                            System.out.println("5. Elementos partilhados (<nome> <nome> ...) ");
+                            System.out.print("6. Cancelar\n> ");
+
+                            int campo = 0;
+                            do {
+                                try{
+                                    campo = input.nextInt();
+
+                                    if (campo < 1 || campo > 6) { // se a excecao for lancada este if n é executado (acho...)
+                                        System.out.print("Opcao invalida. Por favor escolha novamente\n> ");
+                                    }
+                                }catch (InputMismatchException e){
+                                    System.out.print("Opcao invalida. Por favor escolha 1 ou 2\n> ");
+                                    input.nextLine();
+                                }
                             } while (campo < 1 || campo > 6);
 
                             if (campo == 6) break;
 
                             System.out.print("Novo valor: ");
-                            String valor = input.next();
-                            //TODO enviar ao servidor -> comando idDespesa campo novoValor
-                        }
-                        case 16: {
-                            System.out.print("Id da despesa: ");
-                            String id = input.next();
+                            String valor = input.nextLine();
 
-                            //TODO enviar ao servidor -> comando idDespesa
+                            //enviar ao server como edicao de  despesa - Codigo 17
+                            command = "17 " + id + " " + campo + " " + valor;
+                            res = enviaComando(command, in, out);
+                            System.out.println(res);
                         }
-                        case 17: {
+                        case 16 -> {
+                            System.out.print("Id da despesa: ");
+                            int id = -1;
+                            do {
+                                try{
+                                    id = input.nextInt();
+                                }catch (InputMismatchException e){
+                                    System.out.print("Id invalido. Tente novamente\n> ");
+                                    input.nextLine();
+                                }
+                            } while (id < 0);
+
+                            //enviar ao server como eliminar despesa - Codigo 18
+                            command = "18 " + id;
+                            res = enviaComando(command, in, out);
+                            System.out.println(res);
+
+                        }
+                        case 17 -> {
                             System.out.print("Quem pagou: ");
                             String quemP = input.next();
                             System.out.print("Quem recebeu: ");
@@ -266,22 +411,53 @@ public class ClienteUI {
                             System.out.print("Data (dd/mm/aa): ");
                             String data = input.next();
                             System.out.print("Valor: ");
-                            String valor = input.next();
+                            float valor = -1;
+                            do {
+                                try{
+                                    valor = input.nextFloat();
+                                }catch (InputMismatchException e){
+                                    System.out.print("Valor invalido. Tente novamente\n> ");
+                                    input.nextLine();
+                                }
+                            } while (valor < 0);
 
-                            //TODO enviar ao servidor -> comando quemP quemR data valor
+                            //enviar ao server como novo pagamento - Codigo 19
+                            command = "19 " + quemP + " " + quemR + " " + data + " " + valor;
+                            res = enviaComando(command, in, out);
+                            System.out.println(res);
                         }
-                        case 18: {
-                            //TODO pedir ao servidor pagamentos do grupo atual deste cliente
+                        case 18 -> {
+                            //enviar ao server como novo pagamento - Codigo 19
+                            command = "20";
+                            res = enviaComando(command, in, out);
+                            System.out.println(res);
                         }
-                        case 19: {
+                        case 19 -> {
                             System.out.print("Id do pagamento: ");
-                            String id = input.next();
+                            int id = -1;
+                            do {
+                                try{
+                                    id = input.nextInt();
+                                }catch (InputMismatchException e){
+                                    System.out.print("Id invalido. Tente novamente\n> ");
+                                    input.nextLine();
+                                }
+                            } while (id < 0);
+
+                            command = "21 " + id;
+                            res = enviaComando(command, in, out);
+                            System.out.println(res);
                         }
-                        case 20: {
-                            //TODO pedir ao servidor saldos do grupo atual deste cliente
+                        case 20 -> {
+                            command = "21";
+                            res = enviaComando(command, in, out);
+                            System.out.println(res);
                         }
-                        case 21: {
-                            //TODO suicidio
+                        case 21 -> {
+                            //TODO suicidio, desconetar do servidor
+                            System.out.println("\nAte a proxima!");
+                            socket.close();
+
                         }
                     }
 

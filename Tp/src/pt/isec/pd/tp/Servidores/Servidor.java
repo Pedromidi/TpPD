@@ -40,23 +40,18 @@ public class Servidor {
         }
 
         try {
-            // d)
-            // [PT] Popular as variáveis com os valores dos args
-            // [EN] Populate variables with the arg values
+
+            //Popular as variáveis com os valores dos args
             listeningPort = Integer.parseInt(args[0]);
             serverSocket = new ServerSocket(listeningPort);
 
             System.out.println("TCP Message Server iniciado...");
 
             while (true) {
-                // e)
-                // [PT] Escuta uma ligação a ser feita ao socket e aceita-a
-                // [EN] Listens for a connection to be made to this socket and accepts it
+                //Escuta uma ligação a ser feita ao socket e aceita-a
                 Socket clientSocket = serverSocket.accept();
 
-                // f)
-                // [PT] Criar e iniciar a thread que vai processar/atender cada cliente
-                // [EN] Create and start the thread that will process/attend each client
+                // Criar e iniciar a thread que vai processar/atender cada cliente
                 Runnable clientThread = new AtendeCliente(clientSocket);
                 Thread t = new Thread(clientThread);
                 t.start();
