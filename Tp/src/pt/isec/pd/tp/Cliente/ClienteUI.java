@@ -24,6 +24,23 @@ public class ClienteUI {
         return ("Server:" + response);
     }
 
+    public static void desconectarDoServidor(ObjectInputStream in, ObjectOutputStream out, Socket socket) {
+        try {
+            if (in != null) {
+                in.close();
+            }
+            if (out != null) {
+                out.close();
+            }
+            if (socket != null && !socket.isClosed()) {
+                socket.close();
+            }
+            System.out.println("Desconectado do servidor com sucesso.");
+        } catch (IOException e) {
+            System.err.println("Erro ao desconectar do servidor: " + e.getMessage());
+        }
+    }
+
     public static void main(String[] args) {
         InetAddress serverAddr;
         int serverPort;
@@ -454,7 +471,7 @@ public class ClienteUI {
                             System.out.println(res);
                         }
                         case 21 -> {
-                            //TODO suicidio, desconetar do servidor
+                            desconectarDoServidor(in, out, socket);
                             System.out.println("\nAte a proxima!");
                             socket.close();
 
