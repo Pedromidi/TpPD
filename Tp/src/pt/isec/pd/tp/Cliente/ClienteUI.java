@@ -16,22 +16,13 @@ public class ClienteUI {
     public static final String TIME_REQUEST = "TIME";
     public static final int TIMEOUT = 10;
 
-
     public static String enviaComando(String comando, ObjectInputStream in, ObjectOutputStream out) throws IOException, ClassNotFoundException {
         out.writeObject(comando);
-        out.flush(); //envio imediato
+        out.flush();//envio imediato
 
         String response = (String) in.readObject();
-        return "Server: " + response; // retorna a resposta do servidor
+        return "Server: " + response;
     }
-
-    /*public static String enviaComando(String comando, ObjectInputStream in, ObjectOutputStream out) throws IOException, ClassNotFoundException {
-        //TODO enviar string ao servidor, servidor verifica e devolve resposta
-        out.writeObject(comando);
-        String response = (String) in.readObject();
-        //System.out.println("Server:\n" + response);
-        return ("Server:" + response);
-    }*/
 
     public static void desconectarDoServidor(ObjectInputStream in, ObjectOutputStream out, Socket socket) {
         try {
