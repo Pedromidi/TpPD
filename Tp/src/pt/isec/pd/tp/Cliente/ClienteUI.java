@@ -41,6 +41,8 @@ public class ClienteUI {
         }
     }
 
+
+
     public static void main(String[] args) {
         InetAddress serverAddr;
         int serverPort;
@@ -128,6 +130,8 @@ public class ClienteUI {
                     res = enviaComando(command, in, out);
                     System.out.println(res);
                 }
+
+                boolean continuar = true;  // Variável de controle para encerrar o loop
 
                 do {
 
@@ -471,15 +475,20 @@ public class ClienteUI {
                             System.out.println(res);
                         }
                         case 21 -> {
-                            desconectarDoServidor(in, out, socket);
+
+                            continuar = false;
+                            //desconectarDoServidor(in, out, socket);
                             System.out.println("\nAte a proxima!");
                             socket.close();
 
                         }
                     }
 
-                } while (true);
+                } while (continuar);
+
                 //logout ou servidor termina
+                desconectarDoServidor(in, out, socket);
+                System.out.println("Desconectado com sucesso.");
             }
         } catch (UnknownHostException e) {
             System.out.println("Destino desconhecido:\n\t" + e);
@@ -494,6 +503,7 @@ public class ClienteUI {
         } catch (ClassNotFoundException e) {
             System.out.println("O objecto recebido não é do tipo esperado:\n\t" + e);
         }
+
 /*
     public void requestExample(){
         InetAddress serverAddr;
