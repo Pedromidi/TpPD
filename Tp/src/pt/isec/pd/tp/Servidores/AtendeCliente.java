@@ -65,7 +65,7 @@ public class AtendeCliente implements Runnable {
                 return trocarGrupoAtual(comando,arr);
 
             case "6": //6 <email>
-                criarConvite(comando,arr);
+                return criarConvite(comando,arr);
 
             case "7": //7
                 return verConvites(comando,arr);

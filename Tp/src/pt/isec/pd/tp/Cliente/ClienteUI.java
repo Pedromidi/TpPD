@@ -479,7 +479,6 @@ public class ClienteUI {
                             continuar = false;
                             //desconectarDoServidor(in, out, socket);
                             System.out.println("\nAte a proxima!");
-                            socket.close();
 
                         }
                     }
@@ -504,50 +503,5 @@ public class ClienteUI {
             System.out.println("O objecto recebido não é do tipo esperado:\n\t" + e);
         }
 
-/*
-    public void requestExample(){
-        InetAddress serverAddr;
-        int serverPort;
-        Calendar response;
-
-        if (args.length != 2) {
-            System.out.println("Sintaxe: java Client serverAddress serverPort");
-            return;
-        }
-
-        try {
-            serverAddr = InetAddress.getByName(args[0]);
-            serverPort = Integer.parseInt(args[1]);
-
-            try (Socket socket = new Socket(serverAddr, serverPort)) {
-                socket.setSoTimeout(TIMEOUT * 1000);
-
-                // a)
-                // [PT] Serializar o objecto do tipo String TIME_REQUEST para o OutputStream disponibilizado pelo socket
-                ObjectOutputStream out = new ObjectOutputStream(socket.getOutputStream());
-                out.writeObject("Time");
-
-                // b)
-                // [PT] Deserializa o objecto do tipo Calendar recebido no InputStream disponibilizado pelo socket
-                ObjectInputStream in =  new ObjectInputStream(socket.getInputStream());
-                response = (Calendar) in.readObject();
-
-                System.out.println("Resposta: " + response.getTime());
-            }
-        } catch (UnknownHostException e) {
-            System.out.println("Destino desconhecido:\n\t" + e);
-        } catch (NumberFormatException e) {
-            System.out.println("O porto do servidor deve ser um inteiro positivo.");
-        } catch (SocketTimeoutException e) {
-            System.out.println("Nao foi recebida qualquer resposta:\n\t" + e);
-        } catch (SocketException e) {
-            System.out.println("Ocorreu um erro ao nivel do socket TCP:\n\t" + e);
-        } catch (IOException e) {
-            System.out.println("Ocorreu um erro no acesso ao socket:\n\t" + e);
-        } catch(ClassNotFoundException e){
-            System.out.println("O objecto recebido não é do tipo esperado:\n\t"+e);
-        }
-    }
-*/
     }
 }

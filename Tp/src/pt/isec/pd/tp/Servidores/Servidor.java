@@ -34,12 +34,14 @@ public class Servidor {
         ServerSocket serverSocket;
         int listeningPort;
 
-        if (args.length != 1) {
-            System.out.println("Sintaxe: java Servidor listeningPort");
+        if (args.length != 3) {
+            System.out.println("Sintaxe: java Servidor listeningPort bdAdress dbName");
             return;
         }
 
         try {
+            DbManager manager =  new DbManager(args[1], args[2]);
+            manager.connect();
 
             //Popular as variáveis com os valores dos args
             listeningPort = Integer.parseInt(args[0]);
