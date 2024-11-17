@@ -41,7 +41,7 @@ public class Servidor {
 
         try {
             DbManager manager =  new DbManager(args[1], args[2]);
-            manager.connect();
+            System.out.println(manager.connect());
 
             //Popular as variáveis com os valores dos args
             listeningPort = Integer.parseInt(args[0]);
@@ -54,7 +54,7 @@ public class Servidor {
                 Socket clientSocket = serverSocket.accept();
 
                 // Criar e iniciar a thread que vai processar/atender cada cliente
-                Runnable clientThread = new AtendeCliente(clientSocket);
+                Runnable clientThread = new AtendeCliente(clientSocket,manager);
                 Thread t = new Thread(clientThread);
                 t.start();
             }

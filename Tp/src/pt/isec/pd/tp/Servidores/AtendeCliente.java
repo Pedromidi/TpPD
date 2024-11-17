@@ -9,9 +9,14 @@ import java.net.Socket;
 
 public class AtendeCliente implements Runnable {
     Socket clientSocket;
+    DbManager db;
+    String email;
+    String grupoAtual;
 
-    public AtendeCliente(Socket clientSocket) {
+    public AtendeCliente(Socket clientSocket, DbManager db) {
         this.clientSocket = clientSocket;
+        this.db = db;
+        email = grupoAtual = null;
     }
 
     @Override
@@ -44,7 +49,7 @@ public class AtendeCliente implements Runnable {
 
     public String VerificaComando(String comando){
         //login
-        comando = comando.toUpperCase();
+        comando = comando.toLowerCase();
         String arr[] = comando.split(" ");
         //String firstWord = arr[0];
 
@@ -118,9 +123,22 @@ public class AtendeCliente implements Runnable {
         return "";
     }
 
+    /**
+     *  Autenticacao do cliente.
+     *  Verifica se o email existe na base de dados.
+     *  De seguida verifica se a password corresponde
+     */
     public String login(String comando, String[] arr){
-        //TODO verificar se existe na base de dados
-        return "Login aceite";
+
+        if(!db.verificaEmail(arr[1])){
+            return "\nEmail incorreto";
+        }
+        email = arr[1];
+        if(!db.verificaPassword(email, arr[2])){
+            return "\nPassword incorreta";
+        }
+        return "Login aceite! Bem vindo " + email;
+
     }
 
     public String registar(String comando, String[] arr){

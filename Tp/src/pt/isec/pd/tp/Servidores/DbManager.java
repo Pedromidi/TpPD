@@ -2,47 +2,83 @@ package pt.isec.pd.tp.Servidores;
 
 import javax.swing.*;
 import java.io.File;
-import java.sql.DriverManager;
-import java.sql.SQLException;
+import java.sql.*;
 
 public class DbManager {
     String dbPath;
     String dbName;
     String dbAdress;
+    Connection connection;
 
     public DbManager(String dbAdress, String dbName){
         this.dbAdress = dbAdress;
         this.dbName = dbName;
         //this.dbPath = "jdbc:sqlite:" + dbAdress + File.separator + dbName;
-        this.dbPath = "jdbc:sqlite:" + dbAdress + "/" + dbName;
+        this.dbPath = "jdbc:sqlite:" + dbAdress + File.separator + dbName;
 
     }
 
-    public void connect (){
+    public String connect (){
 
-        try (var conn = DriverManager.getConnection(dbPath)) {
-
-            System.out.println("Connection to SQLite has been established.");
+        try {
+            connection = DriverManager.getConnection(dbPath);
+            return "Connection to SQLite has been established.";
 
         } catch (SQLException e) {
-
-            System.out.println(e.getMessage());
-
+            return e.getMessage();
         }
 
     }
 
 //Alterações--------------------------------------------------------------------------------------------------------------------
 
+    public boolean adicionaRegisto(String email, String nome, int telefone, String password){
+        //TODO ...
+        return true;
+    }
 
 //Verificacões------------------------------------------------------------------------------------------------------------------
     /**
      * Verifica se o email existe
+     * com "SELECT EXISTS (select 1 FROM utilizador WHERE email = ?)"
+     * A query devolve 1 se existir e 0 se nao existir
      * @return true, existe;  false, nao existe
      */
     public Boolean verificaEmail(String email){
-        //TODO ir a tabela de utilizadores e procurar o email
-        return true;
+
+        String query = "SELECT EXISTS (select 1 FROM utilizador WHERE email = ?)";
+        try{
+            PreparedStatement stmt = connection.prepareStatement(query);
+            stmt.setString(1,email); //troca o primeiro '?' pelo email
+
+            ResultSet rs = stmt.executeQuery();
+            return rs.getBoolean(1);
+
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    /**
+     * Verifica se o email existe
+     * com "SELECT EXISTS (select 1 FROM utilizador WHERE email = ? AND password = ?)"
+     * A query devolve 1 se existir e 0 se nao existir
+     * @return true, existe;  false, nao existe
+     */
+    public Boolean verificaPassword(String email, String password){
+
+        String query = "SELECT EXISTS (select 1 FROM utilizador WHERE email = ? AND password = ?)";
+        try{
+            PreparedStatement stmt = connection.prepareStatement(query);
+            stmt.setString(1,email); //troca o primeiro '?' pelo email
+            stmt.setString(2,password);
+
+            ResultSet rs = stmt.executeQuery();
+            return rs.getBoolean(1);
+
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     /**

@@ -1,7 +1,5 @@
 package pt.isec.pd.tp.Cliente;
 
-import pt.isec.pd.tp.MSG;
-
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
@@ -10,21 +8,22 @@ import java.net.*;
 import java.util.InputMismatchException;
 import java.util.Scanner;
 
+import static java.lang.System.exit;
+
 public class ClienteUI {
-    private MSG msg;
-    private static Cliente cliente;
-    public static final String TIME_REQUEST = "TIME";
     public static final int TIMEOUT = 10;
 
-    public static String enviaComando(String comando, ObjectInputStream in, ObjectOutputStream out) throws IOException, ClassNotFoundException {
+    private static ObjectInputStream in;
+    private static ObjectOutputStream out;
+    public static String enviaComando(String comando) throws IOException, ClassNotFoundException {
         out.writeObject(comando);
         out.flush();//envio imediato
 
         String response = (String) in.readObject();
-        return "Server: " + response;
+        return "\nServer: " + response;
     }
 
-    public static void desconectarDoServidor(ObjectInputStream in, ObjectOutputStream out, Socket socket) {
+    public static void desconectarDoServidor(Socket socket) {
         try {
             if (in != null) {
                 in.close();
@@ -62,12 +61,12 @@ public class ClienteUI {
                 socket.setSoTimeout(TIMEOUT * 1000);
 
                 //Serializar o objecto do tipo String TIME_REQUEST para o OutputStream disponibilizado pelo socket
-                ObjectOutputStream out = new ObjectOutputStream(socket.getOutputStream());
+                out = new ObjectOutputStream(socket.getOutputStream());
                 out.writeObject("Hello - cliente");
                 out.flush();
 
                 //Deserializa o objecto do tipo Calendar recebido no InputStream disponibilizado pelo socket
-                ObjectInputStream in = new ObjectInputStream(socket.getInputStream());
+                in = new ObjectInputStream(socket.getInputStream());
                 String response = (String) in.readObject();
 
                 System.out.println("Server:\n" + response);
@@ -77,19 +76,26 @@ public class ClienteUI {
 
                 System.out.println("Escolha uma opcao:");
                 System.out.println("1. Autenticacao");
-                System.out.print("2. Registo\n> ");
+                System.out.println("2. Registo ");
+                System.out.print("3. Sair\n>");
                 do {
                     try{
                         opcao = input.nextInt();
 
-                        if (opcao != 1 && opcao != 2) { // se a excecao for lancada este if n é executado (acho...)
-                            System.out.print("Opcao invalida. Por favor escolha 1 ou 2\n> ");
+                        if (opcao < 1 || opcao > 3) { // se a excecao for lancada este if n é executado
+                            System.out.print("Opcao invalida. Por favor escolha entre 1 e 3\n> ");
                         }
+                        if(opcao == 3){
+                            desconectarDoServidor(socket);
+                            exit(0);
+                        }
+
+
                     }catch (InputMismatchException e){
-                        System.out.print("Opcao invalida. Por favor escolha 1 ou 2\n> ");
+                        System.out.print("Opcao invalida. Por favor escolha entre 1 e 3\n> ");
                         input.nextLine();
                     }
-                } while (opcao != 1 && opcao != 2);
+                } while (opcao < 1 || opcao > 3);
 
                 if (opcao == 1) {
                     do {
@@ -100,10 +106,13 @@ public class ClienteUI {
 
                         //Envia comando login ao servidor - Codigo 1
                         command = "1 " + nome + " " + pass;
-                        res = enviaComando(command, in, out);
+                        res = enviaComando(command);
                         System.out.println(res);
 
-                    }while(res.equals("Login aceite"));
+                        if(!res.contains("Login aceite"))
+                            System.out.println("Tente novamente..");
+
+                    }while(!res.contains("Login aceite"));
 
                 } else {
                     System.out.print("Email: ");
@@ -117,7 +126,7 @@ public class ClienteUI {
                             telefone = input.nextInt();
 
                         }catch (InputMismatchException e){
-                            System.out.print("Telefone invalido. Tente novamente\n> ");
+                            System.out.print("Telefone invalido. Tente novamente...\n> ");
                             input.nextLine();
                         }
                     } while (telefone == 0);
@@ -127,7 +136,7 @@ public class ClienteUI {
 
                     //enviar ao server como register - Codigo 2
                     command = "2 " + email + " " + nome + " " + telefone+ " " + password;
-                    res = enviaComando(command, in, out);
+                    res = enviaComando(command);
                     System.out.println(res);
                 }
 
@@ -207,7 +216,7 @@ public class ClienteUI {
 
                             //enviar ao server como mundanca de campo - Codigo 3
                             command = "3 " + escolha + " " + novoCampo + " " + password;
-                            res = enviaComando(command, in, out);
+                            res = enviaComando(command);
                             System.out.println(res);
                         }
                         case 2 -> {
@@ -216,7 +225,7 @@ public class ClienteUI {
 
                             //enviar ao server como mundanca de nome de grupo - Codigo 4
                             command = "4 " + novo;
-                            res = enviaComando(command, in, out);
+                            res = enviaComando(command);
                             System.out.println(res);
                         }
                         case 3 -> {
@@ -225,7 +234,7 @@ public class ClienteUI {
 
                             //enviar ao server como selecao de grupo - Codigo 5
                             command = "5 " + novo;
-                            res = enviaComando(command, in, out);
+                            res = enviaComando(command);
                             System.out.println(res);
                         }
                         case 4 -> {
@@ -234,13 +243,13 @@ public class ClienteUI {
 
                             //enviar ao server como criacao de novo convite - Codigo 6
                             command = "6 " + email;
-                            res = enviaComando(command, in, out);
+                            res = enviaComando(command);
                             System.out.println(res);
                         }
                         case 5 -> {
                             //enviar ao server como mostrar convites - Codigo 7
                             command = "7 ";
-                            res = enviaComando(command, in, out);
+                            res = enviaComando(command);
                             System.out.println(res);
                         }
                         case 6 -> {
@@ -279,13 +288,13 @@ public class ClienteUI {
 
                             //enviar ao server como criacao de novo convite - Codigo 8
                             command = "8 " + id + " " + escolha;
-                            res = enviaComando(command, in, out);
+                            res = enviaComando(command);
                             System.out.println(res);
                         }
                         case 7 -> {
                             //enviar ao server como listar grupos - Codigo 9
                             command = "9";
-                            res = enviaComando(command, in, out);
+                            res = enviaComando(command);
                             System.out.println(res);
                         }
                         case 8 -> {
@@ -294,7 +303,7 @@ public class ClienteUI {
 
                             //enviar ao server como edicao do nome do grupo - Codigo 10
                             command = "10 " + novo;
-                            res = enviaComando(command, in, out);
+                            res = enviaComando(command);
                             System.out.println(res);
                         }
                         case 9 -> {
@@ -303,7 +312,7 @@ public class ClienteUI {
 
                             //enviar ao server como eliminar grupo - Codigo 9
                             command = "11 " + novo;
-                            res = enviaComando(command, in, out);
+                            res = enviaComando(command);
                             System.out.println(res);
                         }
                         case 10 -> {
@@ -312,7 +321,7 @@ public class ClienteUI {
 
                             //enviar ao server como sair de grupo - Codigo 9
                             command = "12 " + novo;
-                            res = enviaComando(command, in, out);
+                            res = enviaComando(command);
                             System.out.println(res);
                         }
                         case 11 -> {
@@ -340,25 +349,25 @@ public class ClienteUI {
                             //enviar ao server como nova despesa - Codigo 9
                             command = "13 " + valor + " " + data + " " + quem + " ;" + comQuem + ";" + descricao;
 
-                            res = enviaComando(command, in, out);
+                            res = enviaComando(command);
                             System.out.println(res);
                         }
                         case 12 -> {
                             //enviar ao server como ver valor das despesas- Codigo 9
                             command = "14";
-                            res = enviaComando(command, in, out);
+                            res = enviaComando(command);
                             System.out.println(res);
                         }
                         case 13 -> {
                             //enviar ao server como ver historico das despesas- Codigo 15
                             command = "15";
-                            res = enviaComando(command, in, out);
+                            res = enviaComando(command);
                             System.out.println(res);
                         }
                         case 14 -> {
                             //enviar ao server como exportar historico das despesas- Codigo 16
                             command = "16";
-                            res = enviaComando(command, in, out);
+                            res = enviaComando(command);
                             System.out.println(res);
                         }
                         case 15 -> {
@@ -403,7 +412,7 @@ public class ClienteUI {
 
                             //enviar ao server como edicao de  despesa - Codigo 17
                             command = "17 " + id + " " + campo + " " + valor;
-                            res = enviaComando(command, in, out);
+                            res = enviaComando(command);
                             System.out.println(res);
                         }
                         case 16 -> {
@@ -420,7 +429,7 @@ public class ClienteUI {
 
                             //enviar ao server como eliminar despesa - Codigo 18
                             command = "18 " + id;
-                            res = enviaComando(command, in, out);
+                            res = enviaComando(command);
                             System.out.println(res);
 
                         }
@@ -444,13 +453,13 @@ public class ClienteUI {
 
                             //enviar ao server como novo pagamento - Codigo 19
                             command = "19 " + quemP + " " + quemR + " " + data + " " + valor;
-                            res = enviaComando(command, in, out);
+                            res = enviaComando(command);
                             System.out.println(res);
                         }
                         case 18 -> {
                             //enviar ao server como novo pagamento - Codigo 19
                             command = "20";
-                            res = enviaComando(command, in, out);
+                            res = enviaComando(command);
                             System.out.println(res);
                         }
                         case 19 -> {
@@ -466,12 +475,12 @@ public class ClienteUI {
                             } while (id < 0);
 
                             command = "21 " + id;
-                            res = enviaComando(command, in, out);
+                            res = enviaComando(command);
                             System.out.println(res);
                         }
                         case 20 -> {
                             command = "21";
-                            res = enviaComando(command, in, out);
+                            res = enviaComando(command);
                             System.out.println(res);
                         }
                         case 21 -> {
@@ -486,7 +495,7 @@ public class ClienteUI {
                 } while (continuar);
 
                 //logout ou servidor termina
-                desconectarDoServidor(in, out, socket);
+                desconectarDoServidor(socket);
                 System.out.println("Desconectado com sucesso.");
             }
         } catch (UnknownHostException e) {
