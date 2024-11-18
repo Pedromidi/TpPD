@@ -33,6 +33,9 @@ public class Servidor {
     public static void main(String[] args) {
         ServerSocket serverSocket;
         int listeningPort;
+        //Todo - criar uma funcao tipo getdbVersion no dbManager e substituir abaixo
+        int dbVersion = 1; // Versão atual da base de dados
+        int port = 7005; // Porta TCP para conexões do servidor backup
 
         if (args.length != 3) {
             System.out.println("Sintaxe: java Servidor listeningPort bdAdress dbName");
@@ -42,6 +45,10 @@ public class Servidor {
         try {
             DbManager manager =  new DbManager(args[1], args[2]);
             System.out.println(manager.connect());
+
+            Heartbeat heartbeat = new Heartbeat(port, dbVersion);
+            Thread hbThread = new Thread(heartbeat);
+            hbThread.start();
 
             //Popular as variáveis com os valores dos args
             listeningPort = Integer.parseInt(args[0]);
