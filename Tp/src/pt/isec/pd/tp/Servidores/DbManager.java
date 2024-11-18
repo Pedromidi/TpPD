@@ -32,10 +32,21 @@ public class DbManager {
 
 //Alterações--------------------------------------------------------------------------------------------------------------------
 
-    public boolean adicionaRegisto(String email, String nome, int telefone, String password){
-        //TODO ...
-        return true;
+    public boolean adicionaRegisto(String email, String nome, String telefone, String password){
+        String query = "INSERT INTO Utilizadores (email, nome, telefone, password) VALUES (?, ?, ?, ?)";
+        try (PreparedStatement stmt = connection.prepareStatement(query)) {
+            stmt.setString(1, email);
+            stmt.setString(2, nome);
+            stmt.setString(3, telefone);
+            stmt.setString(4, password);
+            stmt.executeUpdate();
+            return true; // Sucesso
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return false; // Falha
+        }
     }
+
 
 //Verificacões------------------------------------------------------------------------------------------------------------------
     /**
@@ -86,8 +97,15 @@ public class DbManager {
      * @return true, existe;  false, não existe
      */
     public Boolean verificaTelefone(String telefone){
-        //TODO ir a tabela de utilizadores e procurar o telefone
-        return true;
+        String query = "SELECT 1 FROM Utilizadores WHERE telefone = ?";
+        try (PreparedStatement stmt = connection.prepareStatement(query)) {
+            stmt.setString(1, telefone);
+            ResultSet rs = stmt.executeQuery();
+            return rs.next(); // Retorna true se o telefone for encontrado
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return false;
+        }
     }
 
     /**

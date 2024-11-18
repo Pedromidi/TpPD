@@ -141,15 +141,27 @@ public class AtendeCliente implements Runnable {
 
     }
 
-    public String registar(String comando, String[] arr){
-        //TODO - verifica se já existe este email na BD, arr[1]
-            //return "\n Email já existente na Base de Dados";
-        //TODO - verifica se já existe este telefone na BD, arr[2]
-            //return "\n Telefone já existente na Base de Dados";
+    public String registar(String comando, String[] arr) {
+        if (db.verificaEmail(arr[1])) {
+            return "\nEmail já existente na Base de Dados.";
+        }
 
-        //TODO - adiciona novo utilizador na base de dados
-        return "\n O seu registo foi criado com sucesso!";
+        if (db.verificaTelefone(arr[3])) {
+            return "\nTelefone já existente na Base de Dados.";
+        }
+
+        // Adicionar novo utilizador na base de dados
+        boolean sucesso = db.adicionaRegisto(arr[1], arr[2], arr[3], arr[4]); // arr[1] = email, arr[2] = nome, arr[3] = telefone, arr[4] = password
+
+        if (sucesso) {
+            return "\nO seu registo foi criado com sucesso!";
+        } else {
+            return "\nOcorreu um erro ao criar o seu registo. Por favor, tente novamente.";
+        }
+
     }
+
+
 
     /**
      *  Edição dos dados de registo
