@@ -150,7 +150,7 @@ public class AtendeCliente implements Runnable {
             return "\nTelefone já existente na Base de Dados.";
         }
 
-        // Adicionar novo utilizador na base de dados
+        //Adicionar novo utilizador
         boolean sucesso = db.adicionaRegisto(arr[1], arr[2], arr[3], arr[4]); // arr[1] = email, arr[2] = nome, arr[3] = telefone, arr[4] = password
 
         if (sucesso) {
