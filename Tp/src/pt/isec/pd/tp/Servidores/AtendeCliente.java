@@ -154,11 +154,11 @@ public class AtendeCliente implements Runnable {
         boolean sucesso = db.adicionaRegisto(arr[1], arr[2], arr[3], arr[4]); // arr[1] = email, arr[2] = nome, arr[3] = telefone, arr[4] = password
 
         if (sucesso) {
+            db.incDbVersion();
             return "\nO seu registo foi criado com sucesso!";
         } else {
             return "\nOcorreu um erro ao criar o seu registo. Por favor, tente novamente.";
         }
-
     }
 
 
@@ -323,7 +323,6 @@ public class AtendeCliente implements Runnable {
     public String  verHistoricoDespesas(String comando, String[] arr){
         //TODO calcular gastos. Ir a BD no grupo atual e ver todos os clientes, ver despesas associadas aos clientes e somar?
         return "Historico de despesas:\n - hm bem.. \n - uh.. \n - num sei :(";
-
     }
 
 
@@ -407,7 +406,6 @@ public class AtendeCliente implements Runnable {
         return "\nPagamento adicionado com sucesso";
     }
 
-
     /**
      * Visualização dos saldos do grupo corrente com, para cada elemento, indicação do:
      *    o gasto total;
@@ -420,6 +418,4 @@ public class AtendeCliente implements Runnable {
         //TODO calcular saldos. Ir a BD no grupo atual
         return "Gastos total do grupo: Ainda nao sei :(";
     }
-
-
 }

@@ -7,17 +7,17 @@ import java.net.InetAddress;
 
 public class Heartbeat implements Runnable {
     private int TCPPort;
-    private int DbVersion;
+    private DbManager manager;
 
-    public Heartbeat( int port, int dbVersion) {
+    public Heartbeat( int port, DbManager manager) {
         this.TCPPort = port;
-        this.DbVersion = dbVersion;
+        this.manager = manager;
     }
 
     private void sendHeartbeat() {
         try (DatagramSocket socket = new DatagramSocket()) {
             InetAddress group = InetAddress.getByName("230.44.44.44");
-            String heartbeatMessage = "porto TCP: " + TCPPort + ", versão base dados: " + DbVersion + ", ultima query: ";
+            String heartbeatMessage = "porto TCP: " + TCPPort + ", versão base dados: " + manager.getDbVersion() + ", ultima query: " + manager.getLastQuery();
 
             byte[] buffer = heartbeatMessage.getBytes();
             DatagramPacket pkt = new DatagramPacket(buffer, buffer.length, group, 4444);

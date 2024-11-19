@@ -1,6 +1,7 @@
 package pt.isec.pd.tp.Servidores;
 
 import javax.swing.*;
+import java.beans.DefaultPersistenceDelegate;
 import java.io.File;
 import java.sql.*;
 
@@ -9,37 +10,73 @@ public class DbManager {
     String dbName;
     String dbAdress;
     Connection connection;
+    int dbVersion;
+    String lastQuery;
 
     public DbManager(String dbAdress, String dbName){
         this.dbAdress = dbAdress;
         this.dbName = dbName;
+        this.lastQuery = "";
         //this.dbPath = "jdbc:sqlite:" + dbAdress + File.separator + dbName;
         this.dbPath = "jdbc:sqlite:" + dbAdress + File.separator + dbName;
-
     }
 
     public String connect (){
-
         try {
             connection = DriverManager.getConnection(dbPath);
+            connection.setAutoCommit(true);
             return "Connection to SQLite has been established.";
 
         } catch (SQLException e) {
             return e.getMessage();
         }
-
     }
 
-//Alterações--------------------------------------------------------------------------------------------------------------------
+    public int getDbVersion() {
+        String query = "SELECT numero FROM versao";
+        try (PreparedStatement s = connection.prepareStatement(query);
+             ResultSet rs = s.executeQuery()) {
+            if (rs.next()) {
+                dbVersion = rs.getInt("numero");
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return 666; //Codigo de erro, numero do diabo e tal, parece-me apropriado
+        }
+        return dbVersion;
+    }
+
+    public void incDbVersion(){
+        String query = "UPDATE versao SET numero = numero + 1";
+        try (PreparedStatement s = connection.prepareStatement(query)) {
+            int rowsAffected = s.executeUpdate();
+            if (rowsAffected > 0) {
+                dbVersion = getDbVersion();
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public String getLastQuery(){
+        return lastQuery;
+    }
+
+    public void setLastQuery(String lastQuery) {
+        this.lastQuery = lastQuery;
+    }
+
+    //Alterações--------------------------------------------------------------------------------------------------------------------
 
     public boolean adicionaRegisto(String email, String nome, String telefone, String password){
-        String query = "INSERT INTO Utilizadores (email, nome, telefone, password) VALUES (?, ?, ?, ?)";
+        String query = "INSERT INTO utilizador (email, nome, telefone, password) VALUES (?, ?, ?, ?)";
         try (PreparedStatement stmt = connection.prepareStatement(query)) {
             stmt.setString(1, email);
             stmt.setString(2, nome);
             stmt.setString(3, telefone);
             stmt.setString(4, password);
             stmt.executeUpdate();
+            setLastQuery(query);
             return true; // Sucesso
         } catch (SQLException e) {
             e.printStackTrace();
@@ -97,7 +134,7 @@ public class DbManager {
      * @return true, existe;  false, não existe
      */
     public Boolean verificaTelefone(String telefone){
-        String query = "SELECT 1 FROM Utilizadores WHERE telefone = ?";
+        String query = "SELECT 1 FROM utilizador WHERE telefone = ?";
         try (PreparedStatement stmt = connection.prepareStatement(query)) {
             stmt.setString(1, telefone);
             ResultSet rs = stmt.executeQuery();

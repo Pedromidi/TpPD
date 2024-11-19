@@ -13,7 +13,7 @@ public class ServidorBackup {
         try (MulticastSocket socket = new MulticastSocket(PORT)) {
             InetAddress group = InetAddress.getByName(MULTICAST_ADDRESS);
             socket.joinGroup(group);
-            System.out.println("Listening for heartbeats on " + MULTICAST_ADDRESS + ":" + PORT);
+            System.out.println("Heartbeat esperado de " + MULTICAST_ADDRESS + ":" + PORT);
 
             while (true) {
                 byte[] buffer = new byte[1024];
@@ -21,10 +21,10 @@ public class ServidorBackup {
                 socket.receive(packet);
 
                 String receivedMessage = new String(packet.getData(), 0, packet.getLength());
-                System.out.println("Received: " + receivedMessage);
+                System.out.println("Recebi heartbeat: " + receivedMessage);
             }
         } catch (IOException e) {
-            System.err.println("Error in listener: " + e.getMessage());
+            System.err.println(e.getMessage());
         }
     }
 }
