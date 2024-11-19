@@ -47,6 +47,59 @@ public class DbManager {
         }
     }
 
+    public boolean alteraNome(String email, String novoNome) {
+        String query = "UPDATE Utilizadores SET nome = ? WHERE email = ?";
+        try (PreparedStatement stmt = connection.prepareStatement(query)) {
+            stmt.setString(1, novoNome);
+            stmt.setString(2, email);
+            stmt.executeUpdate();
+            return true;
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
+
+    public boolean alteraTelefone(String email, String novoTelefone) {
+        String query = "UPDATE Utilizadores SET telefone = ? WHERE email = ?";
+        try (PreparedStatement stmt = connection.prepareStatement(query)) {
+            stmt.setString(1, novoTelefone);
+            stmt.setString(2, email);
+            stmt.executeUpdate();
+            return true;
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
+
+    public boolean alteraEmail(String email, String novoEmail) {
+        String query = "UPDATE Utilizadores SET email = ? WHERE email = ?";
+        try (PreparedStatement stmt = connection.prepareStatement(query)) {
+            stmt.setString(1, novoEmail);
+            stmt.setString(2, email);
+            stmt.executeUpdate();
+            return true;
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
+
+    public boolean alteraPassword(String email, String novaPassword) {
+        String query = "UPDATE Utilizadores SET password = ? WHERE email = ?";
+        try (PreparedStatement stmt = connection.prepareStatement(query)) {
+            stmt.setString(1, novaPassword);
+            stmt.setString(2, email);
+            stmt.executeUpdate();
+            return true;
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
+
+
 
 //Verificacões------------------------------------------------------------------------------------------------------------------
     /**

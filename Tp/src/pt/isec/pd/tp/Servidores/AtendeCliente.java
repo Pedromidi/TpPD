@@ -164,31 +164,58 @@ public class AtendeCliente implements Runnable {
 
 
     /**
-     *  Edição dos dados de registo
+     * Edição dos dados de registo.
      */
-    public String editarPerfil (String comando, String[] arr){
-        //TODO - verifica password na BD, arr[1]
-        //return "\nPassword incorreta";
-        switch (arr[1]){
-            case "1":
-                //TODO - altera nome na BD
-                break;
-            case "2":
-                //TODO - verifica se ja existe o telefone na BD
-                //return "\nNumero de telefone invalido";
-                //TODO - altera telefone na BD
-                break;
-            case "3":
-                //TODO - verifica se ja existe o email na BD
-                //return "\nEmail invalido";
-                //TODO - altera email na BD
-                break;
-            case "4":
-                //TODO - altera password na BD
-                break;
+    public String editarPerfil(String comando, String[] arr) {
+        // Verificar password na base de dados
+        if (!db.verificaPassword(email, arr[2])) { // arr[2] = password atual
+            return "\nPassword incorreta.";
         }
-        return "\nCampo alterado com sucesso!";
+
+        switch (arr[1]) {
+            case "1": // Alterar nome
+                boolean alterouNome = db.alteraNome(email, arr[3]); // arr[3] = novo nome
+                if (alterouNome) {
+                    return "\nNome alterado com sucesso!";
+                } else {
+                    return "\nOcorreu um erro ao alterar o nome.";
+                }
+
+            case "2": // Alterar telefone
+                if (db.verificaTelefone(arr[3])) { // arr[3] = novo telefone
+                    return "\nNúmero de telefone inválido.";
+                }
+                boolean alterouTelefone = db.alteraTelefone(email, arr[3]);
+                if (alterouTelefone) {
+                    return "\nTelefone alterado com sucesso!";
+                } else {
+                    return "\nOcorreu um erro ao alterar o telefone.";
+                }
+
+            case "3": // Alterar email
+                if (db.verificaEmail(arr[3])) { // arr[3] = novo email
+                    return "\nEmail inválido.";
+                }
+                boolean alterouEmail = db.alteraEmail(email, arr[3]);
+                if (alterouEmail) {
+                    return "\nEmail alterado com sucesso!";
+                } else {
+                    return "\nOcorreu um erro ao alterar o email.";
+                }
+
+            case "4": // Alterar password
+                boolean alterouPassword = db.alteraPassword(email, arr[3]); // arr[3] = nova password
+                if (alterouPassword) {
+                    return "\nPassword alterada com sucesso!";
+                } else {
+                    return "\nOcorreu um erro ao alterar a password.";
+                }
+
+            default:
+                return "\nOpção inválida.";
+        }
     }
+
 
     /**
      * Criação de um novo grupo, sendo este caracterizado por um nome (por exemplo,
