@@ -60,12 +60,10 @@ public class ClienteUI {
             try (Socket socket = new Socket(serverAddr, serverPort)) {
                 socket.setSoTimeout(TIMEOUT * 1000);
 
-                //Serializar o objecto do tipo String TIME_REQUEST para o OutputStream disponibilizado pelo socket
                 out = new ObjectOutputStream(socket.getOutputStream());
                 out.writeObject("Hello - cliente");
                 out.flush();
 
-                //Deserializa o objecto do tipo Calendar recebido no InputStream disponibilizado pelo socket
                 in = new ObjectInputStream(socket.getInputStream());
                 String response = (String) in.readObject();
 

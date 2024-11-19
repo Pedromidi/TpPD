@@ -43,6 +43,14 @@ public class Servidor {
             DbManager manager =  new DbManager(args[1], args[2]);
             System.out.println(manager.connect());
 
+            //Todo - criar uma funcao tipo getdbVersion no dbManager e substituir abaixo
+            int port = 7005; // Porta TCP para conexões do servidor backup
+            String lastQuery = ""; //Ultima query de um comando sql
+
+            Heartbeat heartbeat = new Heartbeat(port, manager);
+            Thread hbThread = new Thread(heartbeat);
+            hbThread.start();
+
             //Popular as variáveis com os valores dos args
             listeningPort = Integer.parseInt(args[0]);
             serverSocket = new ServerSocket(listeningPort);
