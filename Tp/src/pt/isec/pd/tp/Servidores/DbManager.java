@@ -147,6 +147,47 @@ public class DbManager {
             return false;
         }
     }
+
+    public boolean criaGrupo(String criadorEmail, String nomeGrupo) {
+        String insertGrupo = "INSERT INTO Grupos (nome, criador) VALUES (?, ?)";
+        String insertMembro = "INSERT INTO Membros (grupo, utilizador) VALUES (?, ?)";
+
+        try {
+            connection.setAutoCommit(false); // Iniciar transação
+
+            // Inserir
+            try (PreparedStatement stmtGrupo = connection.prepareStatement(insertGrupo)) {
+                stmtGrupo.setString(1, nomeGrupo);
+                stmtGrupo.setString(2, criadorEmail);
+                stmtGrupo.executeUpdate();
+            }
+
+            // Associar
+            try (PreparedStatement stmtMembro = connection.prepareStatement(insertMembro)) {
+                stmtMembro.setString(1, nomeGrupo);
+                stmtMembro.setString(2, criadorEmail);
+                stmtMembro.executeUpdate();
+            }
+
+            connection.commit(); // Confirmar
+            return true;
+        } catch (SQLException e) {
+            try {
+                connection.rollback(); // Reverter
+            } catch (SQLException rollbackEx) {
+                rollbackEx.printStackTrace();
+            }
+            e.printStackTrace();
+            return false;
+        } finally {
+            try {
+                connection.setAutoCommit(true); // Auto-commit
+            } catch (SQLException ex) {
+                ex.printStackTrace();
+            }
+        }
+    }
+
 //Getters-----------------------------------------------------------------------------------------------------------------------
 
     public ArrayList<String> listaDespesas(String grupo){
@@ -197,6 +238,10 @@ public class DbManager {
             throw new RuntimeException(e);
         }
     }
+
+
+
+
 
 //Verificacões------------------------------------------------------------------------------------------------------------------
     /**
@@ -283,17 +328,47 @@ public class DbManager {
      * @return true, existe
      * @return false, nao existe
      */
-    public Boolean verificaId(String id, String entidade){
+    public Boolean verificaId(String id, String entidade) {
+        String query;
 
-        switch (entidade){
+        switch (entidade.toLowerCase()) {
             case "despesa":
-                //TODO ir a tabela de despesas e procurar o id
+                query = "SELECT COUNT(*) FROM Despesas WHERE id = ?";
+                break;
             case "pagamento":
-                //TODO ir a tabela de pagamentos e procurar o id
+                query = "SELECT COUNT(*) FROM Pagamentos WHERE id = ?";
+                break;
+            default:
+                return false; // Entidade inválida
         }
-        return true;
+
+        try (PreparedStatement stmt = connection.prepareStatement(query)) {
+            stmt.setString(1, id);
+            try (ResultSet rs = stmt.executeQuery()) {
+                if (rs.next()) {
+                    return rs.getInt(1) > 0; // Retorna true se o ID existir
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return false;
     }
 
+    public boolean verificaGrupo(String nomeGrupo) {
+        String query = "SELECT COUNT(*) FROM Grupos WHERE nome = ?";
+        try (PreparedStatement stmt = connection.prepareStatement(query)) {
+            stmt.setString(1, nomeGrupo);
+            try (ResultSet rs = stmt.executeQuery()) {
+                if (rs.next()) {
+                    return rs.getInt(1) > 0; // Retorna true se o grupo já existe
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return false;
+    }
 
 
 

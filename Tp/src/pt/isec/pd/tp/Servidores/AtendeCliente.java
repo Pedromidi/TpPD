@@ -219,16 +219,19 @@ public class AtendeCliente implements Runnable {
     }
 
 
-    /**
-     * Criação de um novo grupo, sendo este caracterizado por um nome (por exemplo,
-     *  Viagem finalistas deis-isec 2025 - Andorra) que deve ser único no sistema. O
-     *  utilizador que cria o grupo passa automaticamente a integrá-lo (primeiro elemento);
-     */
-    public String criarGrupo (String comando, String[] arr){
-        //TODO - verifica se ja esse nome de grupo na BD
-        //return "\nNome de Grupo indisponivel";
-        //TODO - altera nome do grupo na BD
-        return "\nNome do Grupo alterado com sucesso!";
+    public String criarGrupo(String comando, String[] arr) {
+        // arr[1] = nome do grupo
+
+        if (db.verificaGrupo(arr[1])) {
+            return "\nNome de Grupo indisponível.";
+        }
+
+        boolean grupoCriado = db.criaGrupo(email, arr[1]); // email é o utilizador autenticado no sistema
+        if (grupoCriado) {
+            return "\nNome do Grupo criado com sucesso!";
+        } else {
+            return "\nOcorreu um erro ao criar o grupo.";
+        }
     }
 
     /**
