@@ -12,11 +12,13 @@ public class DbManager {
     Connection connection;
     int dbVersion;
     String lastQuery;
+    boolean updated;
 
     public DbManager(String dbAdress, String dbName){
         this.dbAdress = dbAdress;
         this.dbName = dbName;
         this.lastQuery = "none";
+        this.updated = false;
         //this.dbPath = "jdbc:sqlite:" + dbAdress + File.separator + dbName;
         this.dbPath = "jdbc:sqlite:" + dbAdress + File.separator + dbName;
     }
@@ -52,6 +54,7 @@ public class DbManager {
             int rowsAffected = s.executeUpdate();
             if (rowsAffected > 0) {
                 dbVersion = getDbVersion();
+                updated = true;
             }
         } catch (SQLException e) {
             e.printStackTrace();
@@ -64,6 +67,14 @@ public class DbManager {
 
     public void setLastQuery(String lastQuery) {
         this.lastQuery = lastQuery;
+    }
+
+    public boolean isUpdated() {
+        return updated;
+    }
+
+    public void setUpdated(boolean updated) {
+        this.updated = updated;
     }
 
     //Alterações--------------------------------------------------------------------------------------------------------------------

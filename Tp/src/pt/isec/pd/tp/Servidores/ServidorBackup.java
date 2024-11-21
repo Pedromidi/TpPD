@@ -10,6 +10,7 @@ public class ServidorBackup {
     public static int dbVersion;
     public static int lastDbVersion;
     public static String lastQuery;
+    public static boolean updated;
 
 
     public static void stethoscope(MulticastSocket socket) throws IOException {
@@ -22,16 +23,18 @@ public class ServidorBackup {
         String receivedMessage = new String(packet.getData(), 0, packet.getLength());
         System.out.println("Recebi heartbeat: " + receivedMessage);
 
-        String[] parts = receivedMessage.split(", ");
+        String[] parts = receivedMessage.split("; ");
         String tcpport = parts[0].split(": ")[1];
         tcpPort = Integer.parseInt(tcpport);
         String dbversion = parts[1].split(": ")[1];
         dbVersion = Integer.parseInt(dbversion);
         lastQuery = parts[2].split(": ")[1];
+        updated = Boolean.parseBoolean(parts[3].split(": ")[1]);
 
         /*System.out.println("TCPPort: " + tcpPort);
         System.out.println("DbVersion: " + dbVersion);
-        System.out.println("LastQuery: " + lastQuery);*/
+        System.out.println("LastQuery: " + lastQuery);
+        System.out.println("Updated: " + updated);*/
     }
 
     public static boolean setupInicial(MulticastSocket socket, String backupDirPath) throws IOException {
@@ -115,7 +118,7 @@ public class ServidorBackup {
 
             while (true) {
                 stethoscope(socket);
-                if(lastQuery.equals("none")){
+                if(!updated){
                     if(dbVersion!=lastDbVersion) {
                         System.out.println("Versão da base de dados em conflito");
                         return;
@@ -129,7 +132,7 @@ public class ServidorBackup {
                     else{
                         //TODO - fazer nova copia?? fazer a query do heartbeat na versão backup??
                         //TODO - depois de atualizar o backup é preciso informar o servidor
-                        System.out.println("Chilling...");
+                        System.out.println("Ainda não implementado...");
                     }
                 }
             }

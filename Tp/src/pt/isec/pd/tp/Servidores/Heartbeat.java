@@ -17,7 +17,7 @@ public class Heartbeat implements Runnable {
     private void sendHeartbeat() {
         try (DatagramSocket socket = new DatagramSocket()) {
             InetAddress group = InetAddress.getByName("230.44.44.44");
-            String heartbeatMessage = "porto TCP: " + TCPPort + ", versão base dados: " + manager.getDbVersion() + ", ultima query: " + manager.getLastQuery();
+            String heartbeatMessage = "porto TCP: " + TCPPort + "; versão base dados: " + manager.getDbVersion() + "; ultima query: " + manager.getLastQuery() + "; houve update: " + manager.isUpdated();
 
             byte[] buffer = heartbeatMessage.getBytes();
             DatagramPacket pkt = new DatagramPacket(buffer, buffer.length, group, 4444);
@@ -34,6 +34,7 @@ public class Heartbeat implements Runnable {
         while (true) {
             try {
                 sendHeartbeat();
+                manager.setUpdated(false);
                 Thread.sleep(10000);
             } catch (InterruptedException e) {
                 System.err.println(e.getMessage());
