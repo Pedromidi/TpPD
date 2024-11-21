@@ -6,6 +6,7 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.Socket;
+import java.util.ArrayList;
 
 public class AtendeCliente implements Runnable {
     Socket clientSocket;
@@ -55,19 +56,19 @@ public class AtendeCliente implements Runnable {
 
         switch(arr[0]) {
             case "1": //1 <email> <password>
-                return login(comando, arr);
+                return login(arr);
 
             case "2": //2 <email> <nome> <telefone> <password>
-                return registar(comando,arr);
+                return registar(arr);
 
             case "3": //3 n <novoValor> <password>
-                return editarPerfil(comando, arr);
+                return editarPerfil(arr);
 
             case "4": // 4 <novonome>
                 return criarGrupo(comando,arr);
 
             case "5": //5 <novogrupo>
-                return trocarGrupoAtual(comando,arr);
+                return trocarGrupoAtual(arr);
 
             case "6": //6 <email>
                 return criarConvite(comando,arr);
@@ -128,7 +129,7 @@ public class AtendeCliente implements Runnable {
      *  Verifica se o email existe na base de dados.
      *  De seguida verifica se a password corresponde
      */
-    public String login(String comando, String[] arr){
+    public String login(String[] arr){
 
         if(!db.verificaEmail(arr[1])){
             return "\nEmail incorreto";
@@ -141,7 +142,7 @@ public class AtendeCliente implements Runnable {
 
     }
 
-    public String registar(String comando, String[] arr) {
+    public String registar(String[] arr) {
         if (db.verificaEmail(arr[1])) {
             return "\nEmail já existente na Base de Dados.";
         }
@@ -154,6 +155,7 @@ public class AtendeCliente implements Runnable {
         boolean sucesso = db.adicionaRegisto(arr[1], arr[2], arr[3], arr[4]); // arr[1] = email, arr[2] = nome, arr[3] = telefone, arr[4] = password
 
         if (sucesso) {
+            email = arr[1];
             db.incDbVersion();
             return "\nO seu registo foi criado com sucesso!";
         } else {
@@ -166,7 +168,7 @@ public class AtendeCliente implements Runnable {
     /**
      * Edição dos dados de registo.
      */
-    public String editarPerfil(String comando, String[] arr) {
+    public String editarPerfil(String[] arr) {
         // Verificar password na base de dados
         if (!db.verificaPassword(email, arr[2])) { // arr[2] = password atual
             return "\nPassword incorreta.";
@@ -231,12 +233,14 @@ public class AtendeCliente implements Runnable {
 
     /**
      * o utilizador escolhe um dos grupos a que pertence e, a partir de esse momento, as
-     *      operações que executar referem-se implicitamente a esse grupo
+     * operações que executar referem-se implicitamente a esse grupo
      */
-    public String trocarGrupoAtual (String comando, String[] arr){
-        //TODO - verifica se cliente pertence ao grupo na BD
-        //return "\nNome de Grupo Invalido";
-        //TODO - altera o do grupo na BD
+    public String trocarGrupoAtual (String[] arr){
+        if(!db.verificaPertenceGrupo(email,arr[1]))
+             return "\nNão pertence a este grupo o ou grupo nao existe... Tente novamente";
+
+        grupoAtual = arr[1];
+
         return "\nGrupo atual alterado com sucesso!";
     }
 
@@ -278,8 +282,7 @@ public class AtendeCliente implements Runnable {
      *  Lista dos grupos a que pertence o utilizador autenticado
      */
     public String  listarGrupos (String comando, String[] arr){
-        //TODO ir a BD seleciona e depois listar todos os grupos a que pertence o user
-        return "\nAinda por implementar :(";
+        return db.listaGrupos(email);
     }
 
     /**
@@ -348,8 +351,16 @@ public class AtendeCliente implements Runnable {
      * no sistema (pode não ser quem efetuou a despesa);
      */
     public String  verHistoricoDespesas(String comando, String[] arr){
-        //TODO calcular gastos. Ir a BD no grupo atual e ver todos os clientes, ver despesas associadas aos clientes e somar?
-        return "Historico de despesas:\n - hm bem.. \n - uh.. \n - num sei :(";
+        if(grupoAtual == null)
+            return "\n Sem grupo atual selecionado. Por favor escolha um grupo";
+
+        //TODO ordenar por datas, (separar por espacos, ir ao elemento 5? e separar por / e pronto.. ordenar.. yay..)
+        ArrayList<String> despesas = db.listaDespesas(grupoAtual);
+        String retu = "\nHitorico de despesas do grupo " ;//+ grupoAtual + ": " + despesas.toString();
+        for (String despesa:despesas) {
+            retu += despesa.toString();
+        }
+        return retu;
     }
 
 

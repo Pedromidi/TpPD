@@ -4,6 +4,7 @@ import javax.swing.*;
 import java.beans.DefaultPersistenceDelegate;
 import java.io.File;
 import java.sql.*;
+import java.util.ArrayList;
 
 public class DbManager {
     String dbPath;
@@ -146,8 +147,56 @@ public class DbManager {
             return false;
         }
     }
+//Getters-----------------------------------------------------------------------------------------------------------------------
 
+    public ArrayList<String> listaDespesas(String grupo){
 
+        String query = "SELECT * FROM despesa WHERE nome_grupo = ?";
+        String query_partilhados = "SELECT email FROM despesa_partilhada where id_despesa = ?";
+        try{
+            PreparedStatement stmt = connection.prepareStatement(query);
+            PreparedStatement stmt_partilhados = connection.prepareStatement(query_partilhados);
+            stmt.setString(1,grupo);
+
+            ArrayList<String> list = new ArrayList<>();
+            ResultSet rs = stmt.executeQuery();
+            while(rs.next()){
+                StringBuilder partilhados = new StringBuilder();
+                stmt_partilhados.setInt(1,rs.getInt("id"));
+
+                ResultSet rs_partilhados = stmt_partilhados.executeQuery();
+                while(rs_partilhados.next()){
+                    partilhados.append(rs.getString(1)+" ");
+                }
+
+                list.add("\n - " + rs.getInt(1) + ", Data: "+ rs.getString(2) + ", Valor:"+rs.getFloat(3)+
+                         "\n    Quem Inseriu: "+rs.getString(6)+ ", Quem Pagou: "+rs.getString(7)+
+                         "\n    Partilhado com: " + partilhados +
+                         "\n    Descricao: " + rs.getString(4));
+            }
+            return list;
+
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    public String listaGrupos(String email){
+        String query = "SELECT nome_grupo FROM elementos_grupo WHERE email = ?";
+        try{
+            PreparedStatement stmt = connection.prepareStatement(query);
+            stmt.setString(1,email);
+
+            ResultSet rs = stmt.executeQuery();
+            StringBuilder result = new StringBuilder("\nLista de grupos: ");
+            while(rs.next()){
+                result.append("\n - " + rs.getString(1));
+            }
+            return result.toString();
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+    }
 
 //Verificacões------------------------------------------------------------------------------------------------------------------
     /**
@@ -214,9 +263,19 @@ public class DbManager {
      * @return true, está no grupo;  false, não está no grupo;
      *
      */
-    public Boolean verificaGrupo(String grupo, String email){
-        //TODO ir a tabela de elementos_grupo e procurar
-        return true;
+    public Boolean verificaPertenceGrupo(String email, String grupo){
+        String query = "SELECT EXISTS (select 1 FROM elementos_grupo WHERE email = ? AND nome_grupo = ?)";
+        try{
+            PreparedStatement stmt = connection.prepareStatement(query);
+            stmt.setString(1,email); //troca o primeiro '?' pelo email
+            stmt.setString(2,grupo);
+
+            ResultSet rs = stmt.executeQuery();
+            return rs.getBoolean(1);
+
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     /**

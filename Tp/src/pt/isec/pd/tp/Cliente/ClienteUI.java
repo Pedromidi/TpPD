@@ -97,13 +97,13 @@ public class ClienteUI {
 
                 if (opcao == 1) {
                     do {
-                        System.out.print("Nome: ");
-                        String nome = input.next();
+                        System.out.print("Email: ");
+                        String email = input.next();
                         System.out.print("Password: ");
                         String pass = input.next();
 
                         //Envia comando login ao servidor - Codigo 1
-                        command = "1 " + nome + " " + pass;
+                        command = "1 " + email + " " + pass;
                         res = enviaComando(command);
                         System.out.println(res);
 
