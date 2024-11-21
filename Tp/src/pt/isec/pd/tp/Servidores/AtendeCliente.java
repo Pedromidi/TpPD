@@ -1,6 +1,6 @@
 package pt.isec.pd.tp.Servidores;
 
-import pt.isec.pd.tp.MSG;
+//import pt.isec.pd.tp.MSG;
 
 import java.io.IOException;
 import java.io.ObjectInputStream;

@@ -3,15 +3,10 @@ package pt.isec.pd.tp.Servidores;
 import pt.isec.pd.tp.Despesa;
 import pt.isec.pd.tp.Grupo;
 
-import java.io.FileWriter;
-import java.io.IOException;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
+import java.io.*;
 import java.net.*;
-import java.util.Calendar;
 
 public class Servidor {
-    public static final String TIME_REQUEST = "TIME";
     String nomeFicheiro = "test";
 
     //100% theory, test it at your own peril
@@ -43,13 +38,16 @@ public class Servidor {
             DbManager manager =  new DbManager(args[1], args[2]);
             System.out.println(manager.connect());
 
-            //Todo - criar uma funcao tipo getdbVersion no dbManager e substituir abaixo
-            int port = 7005; // Porta TCP para conexões do servidor backup
-            String lastQuery = ""; //Ultima query de um comando sql
+            int port = 8005; //Port TCP para conexões do servidor backup
 
             Heartbeat heartbeat = new Heartbeat(port, manager);
             Thread hbThread = new Thread(heartbeat);
             hbThread.start();
+
+            File dbFile = new File(args[1] + File.separator + args[2]);
+            AceitaBackup aceitaBackup = new AceitaBackup(port, dbFile);
+            Thread abThread = new Thread(aceitaBackup);
+            abThread.start();
 
             //Popular as variáveis com os valores dos args
             listeningPort = Integer.parseInt(args[0]);
@@ -58,7 +56,6 @@ public class Servidor {
             System.out.println("TCP Message Server iniciado...");
 
             while (true) {
-                //Escuta uma ligação a ser feita ao socket e aceita-a
                 Socket clientSocket = serverSocket.accept();
 
                 // Criar e iniciar a thread que vai processar/atender cada cliente

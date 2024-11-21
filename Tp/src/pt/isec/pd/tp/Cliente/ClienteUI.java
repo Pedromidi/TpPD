@@ -171,7 +171,7 @@ public class ClienteUI {
                         try{
                             option = input.nextInt();
 
-                            if (option <= 1 || option >=21) { // se a excecao for lancada este if n é executado (acho...)
+                            if (option < 1 || option >21) { // se a excecao for lancada este if n é executado (acho...)
                                 System.out.print("Opcao invalida. Por favor escolha novamente\n> ");
                             }
                         }catch (InputMismatchException e){

@@ -16,7 +16,7 @@ public class DbManager {
     public DbManager(String dbAdress, String dbName){
         this.dbAdress = dbAdress;
         this.dbName = dbName;
-        this.lastQuery = "";
+        this.lastQuery = "none";
         //this.dbPath = "jdbc:sqlite:" + dbAdress + File.separator + dbName;
         this.dbPath = "jdbc:sqlite:" + dbAdress + File.separator + dbName;
     }
