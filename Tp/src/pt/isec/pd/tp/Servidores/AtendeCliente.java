@@ -171,16 +171,17 @@ public class AtendeCliente implements Runnable {
 
     /**
      * Edição dos dados de registo.
+     * 0 - comando, 1 - campo, 2 - novocampo, 3 - pass
      */
     public String editarPerfil(String[] arr) {
         // Verificar password na base de dados
-        if (!db.verificaPassword(email, arr[2])) { // arr[2] = password atual
-            return "\nPassword incorreta.";
+        if(!db.verificaPassword(email, arr[3])){
+            return "\nPassword incorreta";
         }
 
         switch (arr[1]) {
             case "1": // Alterar nome
-                boolean alterouNome = db.alteraNome(email, arr[3]); // arr[3] = novo nome
+                boolean alterouNome = db.alteraNome(email, arr[2]);
                 if (alterouNome) {
                     db.incDbVersion();
                     return "\nNome alterado com sucesso!";
@@ -189,10 +190,10 @@ public class AtendeCliente implements Runnable {
                 }
 
             case "2": // Alterar telefone
-                if (db.verificaTelefone(arr[3])) { // arr[3] = novo telefone
+                if (db.verificaTelefone(arr[2])) {
                     return "\nNúmero de telefone inválido.";
                 }
-                boolean alterouTelefone = db.alteraTelefone(email, arr[3]);
+                boolean alterouTelefone = db.alteraTelefone(email, arr[2]);
                 if (alterouTelefone) {
                     db.incDbVersion();
                     return "\nTelefone alterado com sucesso!";
@@ -201,19 +202,20 @@ public class AtendeCliente implements Runnable {
                 }
 
             case "3": // Alterar email
-                if (db.verificaEmail(arr[3])) { // arr[3] = novo email
+                if (db.verificaEmail(arr[2])) {
                     return "\nEmail inválido.";
                 }
-                boolean alterouEmail = db.alteraEmail(email, arr[3]);
+                boolean alterouEmail = db.alteraEmail(email, arr[2]);
                 if (alterouEmail) {
                     db.incDbVersion();
+                    email = arr[2];
                     return "\nEmail alterado com sucesso!";
                 } else {
                     return "\nOcorreu um erro ao alterar o email.";
                 }
 
             case "4": // Alterar password
-                boolean alterouPassword = db.alteraPassword(email, arr[3]); // arr[3] = nova password
+                boolean alterouPassword = db.alteraPassword(email, arr[2]);
                 if (alterouPassword) {
                     db.incDbVersion();
                     return "\nPassword alterada com sucesso!";
@@ -401,7 +403,6 @@ public class AtendeCliente implements Runnable {
         }
         return retu.toString();
     }
-
 
     /**
      *Exportação, para um ficheiro em formato CSV, da lista de despesas associadas ao

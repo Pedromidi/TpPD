@@ -411,7 +411,7 @@ public class DbManager {
         String query = "SELECT EXISTS (select 1 FROM utilizador WHERE email = ? AND password = ?)";
         try{
             PreparedStatement stmt = connection.prepareStatement(query);
-            stmt.setString(1,email); //troca o primeiro '?' pelo email
+            stmt.setString(1,email);
             stmt.setString(2,password);
 
             ResultSet rs = stmt.executeQuery();
