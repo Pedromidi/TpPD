@@ -33,12 +33,8 @@ public class AtendeCliente implements Runnable {
                 comando = (String) oin.readObject();
                 System.out.println("Recebido \"" + comando + "\" de " + clientSocket.getInetAddress().getHostAddress() + ":" + clientSocket.getPort());
 
-                //Sair da thread se o pedido recebido for diferente do valor dado pela variável Server.TIME_REQUEST
-                /*if (!request.equalsIgnoreCase(Server.TIME_REQUEST)) {
-                    return;
-                }*/
 
-                //Serializar o objecto do tipo Time
+                //Serializar o objecto
                 String res = VerificaComando(comando);
                 oout.writeObject(res);
                 oout.flush();
@@ -65,61 +61,61 @@ public class AtendeCliente implements Runnable {
                 return editarPerfil(arr);
 
             case "4": // 4 <novonome>
-                return criarGrupo(comando,arr);
+                return criarGrupo(arr);
 
             case "5": //5 <novogrupo>
                 return trocarGrupoAtual(arr);
 
             case "6": //6 <email>
-                return criarConvite(comando,arr);
+                return criarConvite(arr);
 
             case "7": //7
-                return verConvites(comando,arr);
+                return verConvites(arr);
 
             case "8": //8 <idconvite> <resposta>
-                return responderConvite(comando, arr);
+                return responderConvite(arr);
 
             case "9": //listagrupo
-                return listarGrupos(comando,arr);
+                return listarGrupos(arr);
 
             case "10": //10 <novonome>
-                return editarNomeGrupo(comando,arr);
+                return editarNomeGrupo(arr);
 
             case "11": //11 <nome>
-                return eliminarGrupo(comando,arr);
+                return eliminarGrupo(arr);
 
             case "12": //12 <grupo>
-                return sairGrupo(comando,arr);
+                return sairGrupo(arr);
 
             case "13": //13 <valor> <data> <quempagou> ;<partilhados>;<descricao>
                 return inserirDespesa(comando,arr);
 
             case "14": //vergastos
-                return verGastos(comando,arr);
+                return verGastos(arr);
 
-            case "15": //verhistoriocodespesas <grupoconcorrente>
-                return  verHistoricoDespesas(comando,arr);
+            case "15": //verhistoriocodespesas
+                return  verHistoricoDespesas(arr);
 
             case "16": //exportardespesas <grupoconcorrente>
-                return exportarDespesas(comando,arr);
+                return exportarDespesas(arr);
 
             case "17": //17 <id> <campoAeditar> <novoValor>
                 return  editarDespesa(comando,arr);
 
             case "18": //18 <id>
-                return eliminarDespesa(comando,arr);
+                return eliminarDespesa(arr);
 
             case "19": // 19 <quemPagou> <quemrecebeu> <data> <valor>
-                return inserirPagamento(comando,arr);
+                return inserirPagamento(arr);
 
             case "20":
-                return verPagamentos(comando,arr);
+                return verPagamentos(arr);
 
             case "21": //21 <id>
-                return eliminarPagamento(comando,arr);
+                return eliminarPagamento(arr);
 
-            case "22": //versaldo <grupoconcorrente>
-                return  verSaldos(comando,arr);
+            case "22": //versaldo
+                return  verSaldos(arr);
         }
         return "";
     }
@@ -153,7 +149,6 @@ public class AtendeCliente implements Runnable {
 
         //Adicionar novo utilizador
         boolean sucesso = db.adicionaRegisto(arr[1], arr[2], arr[3], arr[4]); // arr[1] = email, arr[2] = nome, arr[3] = telefone, arr[4] = password
-
         if (sucesso) {
             email = arr[1];
             db.incDbVersion();
@@ -178,6 +173,7 @@ public class AtendeCliente implements Runnable {
             case "1": // Alterar nome
                 boolean alterouNome = db.alteraNome(email, arr[3]); // arr[3] = novo nome
                 if (alterouNome) {
+                    db.incDbVersion();
                     return "\nNome alterado com sucesso!";
                 } else {
                     return "\nOcorreu um erro ao alterar o nome.";
@@ -189,6 +185,7 @@ public class AtendeCliente implements Runnable {
                 }
                 boolean alterouTelefone = db.alteraTelefone(email, arr[3]);
                 if (alterouTelefone) {
+                    db.incDbVersion();
                     return "\nTelefone alterado com sucesso!";
                 } else {
                     return "\nOcorreu um erro ao alterar o telefone.";
@@ -200,6 +197,7 @@ public class AtendeCliente implements Runnable {
                 }
                 boolean alterouEmail = db.alteraEmail(email, arr[3]);
                 if (alterouEmail) {
+                    db.incDbVersion();
                     return "\nEmail alterado com sucesso!";
                 } else {
                     return "\nOcorreu um erro ao alterar o email.";
@@ -208,6 +206,7 @@ public class AtendeCliente implements Runnable {
             case "4": // Alterar password
                 boolean alterouPassword = db.alteraPassword(email, arr[3]); // arr[3] = nova password
                 if (alterouPassword) {
+                    db.incDbVersion();
                     return "\nPassword alterada com sucesso!";
                 } else {
                     return "\nOcorreu um erro ao alterar a password.";
@@ -219,16 +218,17 @@ public class AtendeCliente implements Runnable {
     }
 
 
-    public String criarGrupo(String comando, String[] arr) {
-        // arr[1] = nome do grupo
+    public String criarGrupo(String[] arr) {
 
-        if (db.verificaGrupo(arr[1])) {
-            return "\nNome de Grupo indisponível.";
+        if (db.verificaGrupo(arr[1])) { // arr[1] = nome do grupo
+            return "\nNome de grupo indisponível.";
         }
 
         boolean grupoCriado = db.criaGrupo(email, arr[1]); // email é o utilizador autenticado no sistema
         if (grupoCriado) {
-            return "\nNome do Grupo criado com sucesso!";
+            grupoAtual = arr[1];
+            db.incDbVersion();
+            return "\nGrupo criado com sucesso!";
         } else {
             return "\nOcorreu um erro ao criar o grupo.";
         }
@@ -251,7 +251,7 @@ public class AtendeCliente implements Runnable {
      *  Criação de convites para adesão a um grupo, sendo os destinatários identificados
      *  através dos seus emails de registo no sistema
      */
-    public String criarConvite (String comando, String[] arr){
+    public String criarConvite (String[] arr){
         //TODO - verifica se existe email o na BD
         //return "\nEmail do destinatario invalido";
         //TODO - criar convite e associar ao cliente do email. (Sem comunicacao com a BD)
@@ -261,7 +261,7 @@ public class AtendeCliente implements Runnable {
     /**
      *     Visualização automática e atualizada dos convites de adesão recebidos/pendentes
      */
-    public String verConvites (String comando, String[] arr){
+    public String verConvites (String[] arr){
         //TODO listar convites
         return "Ainda por implementar :)";
     }
@@ -269,7 +269,7 @@ public class AtendeCliente implements Runnable {
     /**
      *   Aceitação e recusa de convites de adesão a grupos
      */
-    public String  responderConvite (String comando, String[] arr){
+    public String  responderConvite (String[] arr){
         //TODO - verifica se existe convite com o id na sua lista de convites
         //return "\nId do convite invalido";
         switch (arr[2]){
@@ -284,18 +284,26 @@ public class AtendeCliente implements Runnable {
     /**
      *  Lista dos grupos a que pertence o utilizador autenticado
      */
-    public String  listarGrupos (String comando, String[] arr){
+    public String  listarGrupos (String[] arr){
         return db.listaGrupos(email);
     }
 
     /**
      * Edição do nome de um grupo por qualquer um dos seus elementos
      */
-    public String  editarNomeGrupo(String comando, String[] arr){
-        //TODO - verifica se ja existe esse nome de grupo na BD
-        //return "\nNome de Grupo indisponivel";
-        //TODO - altera nome do grupo na BD
-        return "\nNome do Grupo alterado com sucesso!";
+    public String  editarNomeGrupo(String[] arr){
+        if(grupoAtual == null)
+            return "Sem grupo atual selecionado. Por favor escolha um grupo";
+        if(db.verificaGrupo(arr[1]))
+            return "Nome de grupo indisponivel";
+
+        if(db.alteraNomeGrupo(arr[1], grupoAtual)){
+            grupoAtual = arr[1];
+            return "Nome do Grupo alterado com sucesso!";
+        }
+
+        return "Não foi possivel alterar o nome do grupo " + grupoAtual;
+
     }
 
     /**
@@ -303,19 +311,18 @@ public class AtendeCliente implements Runnable {
      * saldar/valor em dívida (ou seja, não podem existir situações de o elemento X deve a
      *  quantia Z ao elemento Y / o elemento Y tem a receber a quantia Z do elemento Y).
      */
-    public String  eliminarGrupo(String comando, String[] arr){
-        //TODO - verifica se existe grupo o na BD
-        //return "\nGrupo invalido";
-        //TODO - verificar condicoes para a eliminacao do grupo
-        //return "\nEste grupo nao pode ser eliminado";
-        //TODO - Eliminar grupo da BD
-        return "\nConvite criado com sucesso!";
+    public String  eliminarGrupo(String[] arr){
+        if(!db.verificaId(arr[1], "pagamento"))
+            return "\nId invalido";
+        if(db.eliminarDespesa(arr[1]))
+            return "\nDespesa eliminada com sucesso";
+        return "\n Nao foi possivel eliminar a despesa";
     }
 
     /**
      * Saída de um grupo se ainda não existir qualquer despesa associada ao utilizador;
      */
-    public String sairGrupo(String comando, String[] arr){
+    public String sairGrupo(String[] arr){
         //TODO - verificar se utilizador está no grupo
         //return "\nGrupo invalido";
         //TODO - verificar condicoes para a eliminacao do grupo
@@ -343,7 +350,7 @@ public class AtendeCliente implements Runnable {
     /**
      *Visualização do valor total de gastos efetuados pelo grupo corrente;
      */
-    public String  verGastos(String comando, String[] arr){
+    public String  verGastos(String[] arr){
         //TODO calcular gastos. Ir a BD no grupo atual e ver todos os clientes, ver despesas associadas aos clientes e somar?
         return "Gastos total do grupo: Ainda nao sei :(";
     }
@@ -353,7 +360,7 @@ public class AtendeCliente implements Runnable {
      * cronologicamente, com todos os detalhes, incluindo a identificação de quem a inseriu
      * no sistema (pode não ser quem efetuou a despesa);
      */
-    public String  verHistoricoDespesas(String comando, String[] arr){
+    public String  verHistoricoDespesas(String[] arr){
         if(grupoAtual == null)
             return "\n Sem grupo atual selecionado. Por favor escolha um grupo";
 
@@ -371,7 +378,7 @@ public class AtendeCliente implements Runnable {
      *Exportação, para um ficheiro em formato CSV, da lista de despesas associadas ao
      *grupo corrente, ordenadas cronologicamente e detalhada (ver exemplo na Figura 1);
      */
-    public String  exportarDespesas(String comando, String[] arr){
+    public String  exportarDespesas(String[] arr){
         //TODO servidor faz logica de exportar ja q é ele q tem acesso aos dados maybe
         return "\n....A teoria está lá... Nao testamos ainda...";
     }
@@ -410,7 +417,7 @@ public class AtendeCliente implements Runnable {
     /**
      * Eliminação de uma despesa;
      */
-    public String  eliminarDespesa(String comando, String[] arr){
+    public String  eliminarDespesa(String[] arr){
         //TODO verificar se o id existe
         //return "\nId de despesa invalido"
         //TODO eliminar a despesa
@@ -422,7 +429,7 @@ public class AtendeCliente implements Runnable {
      * por um elemento do grupo corrente a outro elemento do mesmo grupo, com
      * indicação de: quem pagou; quem recebeu; data; e valor;
      */
-    public String  inserirPagamento(String comando, String[] arr){
+    public String  inserirPagamento(String[] arr){
         //TODO verificar se os emails sao validos
         //return "\nEmail invalido";
         //TODO adicionar pagamento
@@ -432,7 +439,7 @@ public class AtendeCliente implements Runnable {
     /**
      * Listagem dos pagamentos efetuados entre elementos do grupo;
      */
-    public String  verPagamentos(String comando, String[] arr){
+    public String  verPagamentos(String[] arr){
         //TODO busca e lista pagamentos
         return "\nHmm";
     }
@@ -440,7 +447,7 @@ public class AtendeCliente implements Runnable {
     /**
      * Eliminação de um pagamento efetuado por um elemento a outro elemento;
      */
-    public String  eliminarPagamento(String comando, String[] arr){
+    public String  eliminarPagamento(String[] arr){
         //TODO verificar se o id é valido
         //return "\nId invalido";
         //TODO eliminar pagamento
@@ -455,7 +462,7 @@ public class AtendeCliente implements Runnable {
      *    o valor total que tem a receber;
      *    o valor que tem a receber de cada um dos restantes elementos;
      */
-    public String  verSaldos(String comando, String[] arr){
+    public String  verSaldos(String[] arr){
         //TODO calcular saldos. Ir a BD no grupo atual
         return "Gastos total do grupo: Ainda nao sei :(";
     }

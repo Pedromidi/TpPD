@@ -97,11 +97,12 @@ public class DbManager {
     }
 
     public boolean alteraNome(String email, String novoNome) {
-        String query = "UPDATE Utilizadores SET nome = ? WHERE email = ?";
+        String query = "UPDATE utilizador SET nome = ? WHERE email = ?";
         try (PreparedStatement stmt = connection.prepareStatement(query)) {
             stmt.setString(1, novoNome);
             stmt.setString(2, email);
             stmt.executeUpdate();
+            setLastQuery(query);
             return true;
         } catch (SQLException e) {
             e.printStackTrace();
@@ -110,11 +111,12 @@ public class DbManager {
     }
 
     public boolean alteraTelefone(String email, String novoTelefone) {
-        String query = "UPDATE Utilizadores SET telefone = ? WHERE email = ?";
+        String query = "UPDATE utilizador SET telefone = ? WHERE email = ?";
         try (PreparedStatement stmt = connection.prepareStatement(query)) {
             stmt.setString(1, novoTelefone);
             stmt.setString(2, email);
             stmt.executeUpdate();
+            setLastQuery(query);
             return true;
         } catch (SQLException e) {
             e.printStackTrace();
@@ -123,7 +125,7 @@ public class DbManager {
     }
 
     public boolean alteraEmail(String email, String novoEmail) {
-        String query = "UPDATE Utilizadores SET email = ? WHERE email = ?";
+        String query = "UPDATE utilizador SET email = ? WHERE email = ?";
         try (PreparedStatement stmt = connection.prepareStatement(query)) {
             stmt.setString(1, novoEmail);
             stmt.setString(2, email);
@@ -136,11 +138,12 @@ public class DbManager {
     }
 
     public boolean alteraPassword(String email, String novaPassword) {
-        String query = "UPDATE Utilizadores SET password = ? WHERE email = ?";
+        String query = "UPDATE utilizador SET password = ? WHERE email = ?";
         try (PreparedStatement stmt = connection.prepareStatement(query)) {
             stmt.setString(1, novaPassword);
             stmt.setString(2, email);
             stmt.executeUpdate();
+            setLastQuery(query);
             return true;
         } catch (SQLException e) {
             e.printStackTrace();
@@ -149,8 +152,8 @@ public class DbManager {
     }
 
     public boolean criaGrupo(String criadorEmail, String nomeGrupo) {
-        String insertGrupo = "INSERT INTO Grupos (nome, criador) VALUES (?, ?)";
-        String insertMembro = "INSERT INTO Membros (grupo, utilizador) VALUES (?, ?)";
+        String insertGrupo = "INSERT INTO grupo (nome) VALUES (?)";
+        String insertMembro = "INSERT INTO elementos_grupo (nome_grupo, email) VALUES (?, ?)";
 
         try {
             connection.setAutoCommit(false); // Iniciar transação
@@ -158,8 +161,8 @@ public class DbManager {
             // Inserir
             try (PreparedStatement stmtGrupo = connection.prepareStatement(insertGrupo)) {
                 stmtGrupo.setString(1, nomeGrupo);
-                stmtGrupo.setString(2, criadorEmail);
                 stmtGrupo.executeUpdate();
+                setLastQuery(insertGrupo);
             }
 
             // Associar
@@ -167,9 +170,10 @@ public class DbManager {
                 stmtMembro.setString(1, nomeGrupo);
                 stmtMembro.setString(2, criadorEmail);
                 stmtMembro.executeUpdate();
+                setLastQuery(insertMembro);
             }
 
-            connection.commit(); // Confirmar
+            //connection.commit(); // Confirmar
             return true;
         } catch (SQLException e) {
             try {
@@ -185,6 +189,44 @@ public class DbManager {
             } catch (SQLException ex) {
                 ex.printStackTrace();
             }
+        }
+    }
+    public boolean alteraNomeGrupo(String novoNome,String oldNome) { //nao funfa
+        String query = "UPDATE grupo SET nome = ? WHERE nome = ?";
+        try{
+            PreparedStatement stmt = connection.prepareStatement(query);
+            stmt.setString(1, novoNome);
+            stmt.setString(2, oldNome);
+            stmt.executeUpdate();
+            setLastQuery(query);
+            return true;
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
+
+    /**
+     * Elimina uma despesa da Base de Dados
+     * comeca por eliminar as suas dependencias (despesa_partilhada)
+     * e depois elimina da tabela despesa
+     * @param id
+     * @return
+     */
+    public boolean eliminarDespesa(String id){
+        String query1 = "DELETE FROM despesa_partilhada WHERE id_despesa = ? ";
+        String query = "DELETE FROM despesa WHERE id = ?";
+        try (   PreparedStatement stmt1 = connection.prepareStatement(query1);
+                PreparedStatement stmt2 = connection.prepareStatement(query1)) {
+            stmt1.setString(1, id);
+            stmt2.setString(1, id);
+            stmt1.executeUpdate();
+            stmt2.executeUpdate();
+            setLastQuery(query);
+            return true;
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return false;
         }
     }
 
@@ -329,46 +371,39 @@ public class DbManager {
      * @return false, nao existe
      */
     public Boolean verificaId(String id, String entidade) {
-        String query;
 
-        switch (entidade.toLowerCase()) {
-            case "despesa":
-                query = "SELECT COUNT(*) FROM Despesas WHERE id = ?";
-                break;
-            case "pagamento":
-                query = "SELECT COUNT(*) FROM Pagamentos WHERE id = ?";
-                break;
-            default:
-                return false; // Entidade inválida
-        }
+        String query = "SELECT EXISTS (select 1 FROM " + entidade + " WHERE id = ?)";
+        try{
+            PreparedStatement stmt = connection.prepareStatement(query);
+            stmt.setString(1,id);
 
-        try (PreparedStatement stmt = connection.prepareStatement(query)) {
-            stmt.setString(1, id);
-            try (ResultSet rs = stmt.executeQuery()) {
-                if (rs.next()) {
-                    return rs.getInt(1) > 0; // Retorna true se o ID existir
-                }
-            }
+            ResultSet rs = stmt.executeQuery();
+            return rs.getBoolean(1);
+
         } catch (SQLException e) {
-            e.printStackTrace();
+            throw new RuntimeException(e);
         }
-        return false;
     }
 
+    /**
+     * Verifica se o nome do grupo existe na BD
+     * @return true, existe
+     * @return false, nao existe
+     */
     public boolean verificaGrupo(String nomeGrupo) {
-        String query = "SELECT COUNT(*) FROM Grupos WHERE nome = ?";
+        String query = "SELECT EXISTS (select 1 FROM grupo WHERE nome = ?)"; //nomo do hrupo é uma chave unica
         try (PreparedStatement stmt = connection.prepareStatement(query)) {
             stmt.setString(1, nomeGrupo);
-            try (ResultSet rs = stmt.executeQuery()) {
-                if (rs.next()) {
-                    return rs.getInt(1) > 0; // Retorna true se o grupo já existe
-                }
-            }
+            ResultSet rs = stmt.executeQuery();
+
+            return rs.getBoolean(1);
+
         } catch (SQLException e) {
             e.printStackTrace();
         }
         return false;
     }
+
 
 
 
