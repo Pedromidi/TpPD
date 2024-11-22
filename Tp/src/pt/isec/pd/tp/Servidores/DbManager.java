@@ -230,6 +230,27 @@ public class DbManager {
         }
     }
 
+    /**
+     * Elimina uma despesa da Base de Dados
+     * comeca por eliminar as suas dependencias (despesa_partilhada)
+     * e depois elimina da tabela despesa
+     * @param id
+     * @return
+     */
+    public boolean eliminarPagamento(String id){
+        String query1 = "DELETE FROM pagamento WHERE id = ? ";
+
+        try (PreparedStatement stmt1 = connection.prepareStatement(query1)) {
+            stmt1.setString(1, id);
+            stmt1.executeUpdate();
+            setLastQuery(query1);
+            return true;
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
+
 //Getters-----------------------------------------------------------------------------------------------------------------------
 
     public ArrayList<String> listaDespesas(String grupo){

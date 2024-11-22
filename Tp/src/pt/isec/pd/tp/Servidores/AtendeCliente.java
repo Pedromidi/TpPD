@@ -419,10 +419,12 @@ public class AtendeCliente implements Runnable {
      * Eliminação de uma despesa;
      */
     public String  eliminarDespesa(String[] arr){
-        //TODO verificar se o id existe
-        //return "\nId de despesa invalido"
-        //TODO eliminar a despesa
-        return "\nDespesa eliminada com sucesso";
+        if(!db.verificaId(arr[1], "despesa"))
+            return "\nId invalido";
+        if(db.eliminarDespesa(arr[1]))
+            return "\nDespesa eliminada com sucesso";
+        return "\n Nao foi possivel eliminar a pagamento";
+
     }
 
     /**
@@ -451,7 +453,7 @@ public class AtendeCliente implements Runnable {
     public String  eliminarPagamento(String[] arr){
         if(!db.verificaId(arr[1], "pagamento"))
             return "\nId invalido";
-        if(db.eliminarDespesa(arr[1]))
+        if(db.eliminarPagamento(arr[1]))
             return "\nDespesa eliminada com sucesso";
         return "\n Nao foi possivel eliminar a pagamento";
 
