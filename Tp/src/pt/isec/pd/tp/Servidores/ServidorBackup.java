@@ -11,6 +11,7 @@ public class ServidorBackup {
     public static int lastDbVersion;
     public static String lastQuery;
     public static boolean updated;
+    public static File backupFile;
 
 
     public static void stethoscope(MulticastSocket socket) throws IOException {
@@ -37,8 +38,7 @@ public class ServidorBackup {
         System.out.println("Updated: " + updated);*/
     }
 
-    public static boolean setupInicial(MulticastSocket socket, String backupDirPath) throws IOException {
-        stethoscope(socket);
+    public static boolean recebeBD(MulticastSocket socket, String backupDirPath) throws IOException{
 //================================= Conexão TCP ao servidor principal =================================//
         try (Socket mainServerSocket = new Socket("localhost", tcpPort);
              BufferedReader reader = new BufferedReader(new InputStreamReader(mainServerSocket.getInputStream()));
@@ -46,12 +46,10 @@ public class ServidorBackup {
 
             String fileName = reader.readLine();
             long fileSize = Long.parseLong(reader.readLine());
-            System.out.println("Recebendo o ficheiro: " + fileName + " (" + fileSize + " bytes)");
+            System.out.println("Recebendo a base de dados: " + fileName + " (" + fileSize + " bytes)");
 
-            // Caminho onde o ficheiro será salvo
-            File backupFile = new File(backupDirPath + File.separator + fileName);
+            backupFile = new File(backupDirPath + File.separator + fileName);
 
-            // Receber o conteúdo do ficheiro
             try (FileOutputStream fout = new FileOutputStream(backupFile)) {
                 byte[] buffer = new byte[4096];
                 int bytesRead;
@@ -65,6 +63,7 @@ public class ServidorBackup {
                     }
                 }
                 System.out.println("Ficheiro recebido e salvo em: " + backupFile.getAbsolutePath());
+                lastDbVersion = dbVersion;
             }
 
         } catch (IOException e) {
@@ -72,6 +71,14 @@ public class ServidorBackup {
             return false;
         }
         return true;
+    }
+
+    public static boolean setupInicial(MulticastSocket socket, String backupDirPath) throws IOException {
+        stethoscope(socket);
+        if(recebeBD(socket, backupDirPath)){
+            return true;
+        }
+        return false;
     }
 
     public static void main(String[] args) {
@@ -114,8 +121,6 @@ public class ServidorBackup {
                 return;
             }
 
-            lastDbVersion = dbVersion;
-
             while (true) {
                 stethoscope(socket);
                 if(!updated){
@@ -130,9 +135,17 @@ public class ServidorBackup {
                         return;
                     }
                     else{
-                        //TODO - fazer nova copia?? fazer a query do heartbeat na versão backup??
-                        //TODO - depois de atualizar o backup é preciso informar o servidor
-                        System.out.println("Ainda não implementado...");
+                        if (backupFile.exists()) {
+                            if (backupFile.delete()) {
+                                if(!recebeBD(socket, backupDirPath)){
+                                    System.out.println("Falha na cópia da nova versão da base de dados");
+                                }
+                            } else {
+                                System.out.println("Falha na cópia da nova versão da base de dados");
+                            }
+                        } else {
+                            System.out.println("Base de dados não existe"); //nunca deve chegar a este else
+                        }
                     }
                 }
             }
