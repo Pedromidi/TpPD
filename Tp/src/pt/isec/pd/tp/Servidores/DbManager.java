@@ -1,7 +1,5 @@
 package pt.isec.pd.tp.Servidores;
 
-import javax.swing.*;
-import java.beans.DefaultPersistenceDelegate;
 import java.io.File;
 import java.sql.*;
 import java.util.ArrayList;
@@ -98,6 +96,7 @@ public class DbManager {
 
     public boolean alteraNome(String email, String novoNome) {
         String query = "UPDATE utilizador SET nome = ? WHERE email = ?";
+
         try (PreparedStatement stmt = connection.prepareStatement(query)) {
             stmt.setString(1, novoNome);
             stmt.setString(2, email);
@@ -156,15 +155,12 @@ public class DbManager {
         String insertMembro = "INSERT INTO elementos_grupo (nome_grupo, email) VALUES (?, ?)";
 
         try {
-            connection.setAutoCommit(false); // Iniciar transação
-
             // Inserir
             try (PreparedStatement stmtGrupo = connection.prepareStatement(insertGrupo)) {
                 stmtGrupo.setString(1, nomeGrupo);
                 stmtGrupo.executeUpdate();
                 setLastQuery(insertGrupo);
             }
-
             // Associar
             try (PreparedStatement stmtMembro = connection.prepareStatement(insertMembro)) {
                 stmtMembro.setString(1, nomeGrupo);
@@ -172,23 +168,10 @@ public class DbManager {
                 stmtMembro.executeUpdate();
                 setLastQuery(insertMembro);
             }
-
-            //connection.commit(); // Confirmar
             return true;
         } catch (SQLException e) {
-            try {
-                connection.rollback(); // Reverter
-            } catch (SQLException rollbackEx) {
-                rollbackEx.printStackTrace();
-            }
             e.printStackTrace();
             return false;
-        } finally {
-            try {
-                connection.setAutoCommit(true); // Auto-commit
-            } catch (SQLException ex) {
-                ex.printStackTrace();
-            }
         }
     }
     public boolean alteraNomeGrupo(String novoNome,String oldNome) { //nao funfa
@@ -197,7 +180,7 @@ public class DbManager {
             PreparedStatement stmt = connection.prepareStatement(query);
             stmt.setString(1, novoNome);
             stmt.setString(2, oldNome);
-            stmt.executeUpdate();
+            stmt.executeLargeUpdate();
             setLastQuery(query);
             return true;
         } catch (SQLException e) {
@@ -214,15 +197,19 @@ public class DbManager {
      * @return
      */
     public boolean eliminarDespesa(String id){
-        String query1 = "DELETE FROM despesa_partilhada WHERE id_despesa = ? ";
-        String query = "DELETE FROM despesa WHERE id = ?";
-        try (   PreparedStatement stmt1 = connection.prepareStatement(query1);
-                PreparedStatement stmt2 = connection.prepareStatement(query1)) {
+        String dependencias = "DELETE FROM despesa_partilhada WHERE id_despesa = ? ";
+        String despesa = "DELETE FROM despesa WHERE id = ?";
+        try{
+            PreparedStatement stmt1 = connection.prepareStatement(dependencias);
             stmt1.setString(1, id);
-            stmt2.setString(1, id);
             stmt1.executeUpdate();
+            setLastQuery(dependencias);
+
+            PreparedStatement stmt2 = connection.prepareStatement(despesa);
+            stmt2.setString(1, id);
             stmt2.executeUpdate();
-            setLastQuery(query);
+            setLastQuery(despesa);
+
             return true;
         } catch (SQLException e) {
             e.printStackTrace();
