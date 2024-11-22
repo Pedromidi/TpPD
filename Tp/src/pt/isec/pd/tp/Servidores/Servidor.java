@@ -38,20 +38,22 @@ public class Servidor {
             DbManager manager =  new DbManager(args[1], args[2]);
             System.out.println(manager.connect());
 
-            int port = 8005; //Port TCP para conexões do servidor backup
+            //Popular as variáveis com os valores dos args
+            listeningPort = Integer.parseInt(args[0]);
+            serverSocket = new ServerSocket(listeningPort);
+
+            ServerSocket serverSocketBackup = new ServerSocket(0);
+            int port = serverSocketBackup.getLocalPort(); //Port TCP para conexões do servidor backup dado pelo socket automatico
+            System.out.println("Porto automatico criado: " + port);
+
+            File dbFile = new File(args[1] + File.separator + args[2]);
+            AceitaBackup aceitaBackup = new AceitaBackup(serverSocketBackup, dbFile);
+            Thread abThread = new Thread(aceitaBackup);
+            abThread.start();
 
             Heartbeat heartbeat = new Heartbeat(port, manager);
             Thread hbThread = new Thread(heartbeat);
             hbThread.start();
-
-            File dbFile = new File(args[1] + File.separator + args[2]);
-            AceitaBackup aceitaBackup = new AceitaBackup(port, dbFile);
-            Thread abThread = new Thread(aceitaBackup);
-            abThread.start();
-
-            //Popular as variáveis com os valores dos args
-            listeningPort = Integer.parseInt(args[0]);
-            serverSocket = new ServerSocket(listeningPort);
 
             System.out.println("TCP Message Server iniciado...");
 

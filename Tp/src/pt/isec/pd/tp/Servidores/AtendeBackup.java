@@ -8,18 +8,18 @@ import java.net.UnknownHostException;
 
 class AceitaBackup implements Runnable {
     ServerSocket serverSocket;
-    int listeningPort;
+    //int listeningPort;
     File databaseFile;
 
-    public AceitaBackup(int listeningPort, File databaseFile) {
-        this.listeningPort = listeningPort;
+    public AceitaBackup(ServerSocket serverSocket, File databaseFile) {
+        this.serverSocket = serverSocket;
         this.databaseFile = databaseFile;
     }
 
     @Override
     public void run() {
         try {
-            serverSocket = new ServerSocket(listeningPort);
+            //serverSocket = new ServerSocket(listeningPort);
             System.out.println("TCP Server Thread para enviar database iniciada");
 
             while (true) {
