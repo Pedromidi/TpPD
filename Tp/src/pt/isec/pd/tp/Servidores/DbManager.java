@@ -218,7 +218,7 @@ public class DbManager {
     }
 
     /**
-     * Elimina uma despesa da Base de Dados
+     * Elimina um pagamento da Base de Dados
      * comeca por eliminar as suas dependencias (despesa_partilhada)
      * e depois elimina da tabela despesa
      * @param id
@@ -272,6 +272,27 @@ public class DbManager {
         }
     }
 
+    public String listaPagamentos(String grupo){
+
+        String query = "SELECT * FROM pagamento WHERE nome_grupo = ?";
+
+        try{
+            PreparedStatement stmt = connection.prepareStatement(query);
+            stmt.setString(1,grupo);
+
+            StringBuilder list = new StringBuilder();
+            ResultSet rs = stmt.executeQuery();
+            while(rs.next()){
+                list.append("\n - ").append(rs.getInt(1)).append(", Data: ").append(rs.getString(2)).append(", Valor:").append(rs.getFloat(3))
+                                    .append("\n    Quem Recebeu: ").append(rs.getString(5)).append(", Quem Pagou: ").append(rs.getString(6));
+            }
+            return list.toString();
+
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
     public String listaGrupos(String email){
         String query = "SELECT nome_grupo FROM elementos_grupo WHERE email = ?";
         try{
@@ -279,7 +300,7 @@ public class DbManager {
             stmt.setString(1,email);
 
             ResultSet rs = stmt.executeQuery();
-            StringBuilder result = new StringBuilder("\nLista de grupos: ");
+            StringBuilder result = new StringBuilder();
             while(rs.next()){
                 result.append("\n - " + rs.getString(1));
             }

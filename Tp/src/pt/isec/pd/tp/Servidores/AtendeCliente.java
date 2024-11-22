@@ -7,6 +7,7 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.Socket;
 import java.util.ArrayList;
+import java.util.Objects;
 
 public class AtendeCliente implements Runnable {
     Socket clientSocket;
@@ -94,7 +95,7 @@ public class AtendeCliente implements Runnable {
                 return verGastos(arr);
 
             case "15": //verhistoriocodespesas
-                return  verHistoricoDespesas(arr);
+                return  verHistoricoDespesas();
 
             case "16": //exportardespesas <grupoconcorrente>
                 return exportarDespesas(arr);
@@ -109,7 +110,7 @@ public class AtendeCliente implements Runnable {
                 return inserirPagamento(arr);
 
             case "20":
-                return verPagamentos(arr);
+                return verPagamentos();
 
             case "21": //21 <id>
                 return eliminarPagamento(arr);
@@ -285,7 +286,9 @@ public class AtendeCliente implements Runnable {
      *  Lista dos grupos a que pertence o utilizador autenticado
      */
     public String  listarGrupos (String[] arr){
-        return db.listaGrupos(email);
+        String lista = db.listaGrupos(email);
+        return "\nLista de grupos: " + (lista.equals("")? "\nNão pertence a nenhum grupo.."
+                :lista);
     }
 
     /**
@@ -303,7 +306,6 @@ public class AtendeCliente implements Runnable {
         }
 
         return "Não foi possivel alterar o nome do grupo " + grupoAtual;
-
     }
 
     /**
@@ -361,17 +363,21 @@ public class AtendeCliente implements Runnable {
      * cronologicamente, com todos os detalhes, incluindo a identificação de quem a inseriu
      * no sistema (pode não ser quem efetuou a despesa);
      */
-    public String  verHistoricoDespesas(String[] arr){
+    public String  verHistoricoDespesas(){
         if(grupoAtual == null)
             return "\n Sem grupo atual selecionado. Por favor escolha um grupo";
 
         //TODO ordenar por datas, (separar por espacos, ir ao elemento 5? e separar por / e pronto.. ordenar.. yay..)
         ArrayList<String> despesas = db.listaDespesas(grupoAtual);
-        String retu = "\nHitorico de despesas do grupo " ;//+ grupoAtual + ": " + despesas.toString();
-        for (String despesa:despesas) {
-            retu += despesa.toString();
+        StringBuilder retu = new StringBuilder("\nHitorico de despesas do grupo ");//+ grupoAtual + ": " + despesas.toString();
+
+        if(despesas.size() == 0)
+            return retu + "\nNão há despesas a listar...";
+
+        for (String despesa : despesas) {
+            retu.append(despesa);
         }
-        return retu;
+        return retu.toString();
     }
 
 
@@ -442,9 +448,13 @@ public class AtendeCliente implements Runnable {
     /**
      * Listagem dos pagamentos efetuados entre elementos do grupo;
      */
-    public String  verPagamentos(String[] arr){
-        //TODO busca e lista pagamentos
-        return "\nHmm";
+    public String  verPagamentos(){
+        if(grupoAtual == null)
+            return "\n Sem grupo atual selecionado. Por favor escolha um grupo";
+
+        String ret = db.listaPagamentos(grupoAtual);
+        return "\nLista de pagamentos: "
+                +  (ret.equals("") ? "\nNão há pagamentos a listar..": ret);
     }
 
     /**
