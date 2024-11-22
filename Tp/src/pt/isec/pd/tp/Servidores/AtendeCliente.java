@@ -6,6 +6,7 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.Socket;
+import java.net.SocketException;
 import java.util.ArrayList;
 import java.util.Objects;
 
@@ -25,15 +26,19 @@ public class AtendeCliente implements Runnable {
     public void run() {
         String comando;
 
+        try {
+            clientSocket.setSoTimeout(60000);
+        } catch (SocketException e) {
+            e.printStackTrace();
+        }
+
         try (ObjectInputStream oin = new ObjectInputStream(clientSocket.getInputStream());
              ObjectOutputStream oout = new ObjectOutputStream(clientSocket.getOutputStream())) {
-
 
             while(true) {
                 //Deserializar o objecto recebido
                 comando = (String) oin.readObject();
                 System.out.println("Recebido \"" + comando + "\" de " + clientSocket.getInetAddress().getHostAddress() + ":" + clientSocket.getPort());
-
 
                 //Serializar o objecto
                 String res = VerificaComando(comando);
@@ -45,7 +50,7 @@ public class AtendeCliente implements Runnable {
         }
     }
 
-    public String VerificaComando(String comando){
+    public String VerificaComando(String comando) throws IOException {
         //login
         comando = comando.toLowerCase();
         String arr[] = comando.split(" ");
@@ -53,9 +58,11 @@ public class AtendeCliente implements Runnable {
 
         switch(arr[0]) {
             case "1": //1 <email> <password>
+                clientSocket.setSoTimeout(0);
                 return login(arr);
 
             case "2": //2 <email> <nome> <telefone> <password>
+                clientSocket.setSoTimeout(0);
                 return registar(arr);
 
             case "3": //3 n <novoValor> <password>
@@ -126,13 +133,15 @@ public class AtendeCliente implements Runnable {
      *  Verifica se o email existe na base de dados.
      *  De seguida verifica se a password corresponde
      */
-    public String login(String[] arr){
+    public String login(String[] arr) throws IOException {
 
         if(!db.verificaEmail(arr[1])){
+            clientSocket.close();
             return "\nEmail incorreto";
         }
         email = arr[1];
         if(!db.verificaPassword(email, arr[2])){
+            clientSocket.close();
             return "\nPassword incorreta";
         }
         return "Login aceite! Bem vindo " + email;
