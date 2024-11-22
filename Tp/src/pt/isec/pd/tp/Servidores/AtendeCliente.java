@@ -312,11 +312,12 @@ public class AtendeCliente implements Runnable {
      *  quantia Z ao elemento Y / o elemento Y tem a receber a quantia Z do elemento Y).
      */
     public String  eliminarGrupo(String[] arr){
-        if(!db.verificaId(arr[1], "pagamento"))
-            return "\nId invalido";
-        if(db.eliminarDespesa(arr[1]))
-            return "\nDespesa eliminada com sucesso";
-        return "\n Nao foi possivel eliminar a despesa";
+        //TODO - verifica se existe grupo o na BD
+        //return "\nGrupo invalido";
+        //TODO - verificar condicoes para a eliminacao do grupo
+        //return "\nEste grupo nao pode ser eliminado";
+        //TODO - Eliminar grupo da BD
+        return "\nConvite criado com sucesso!";
     }
 
     /**
@@ -448,10 +449,12 @@ public class AtendeCliente implements Runnable {
      * Eliminação de um pagamento efetuado por um elemento a outro elemento;
      */
     public String  eliminarPagamento(String[] arr){
-        //TODO verificar se o id é valido
-        //return "\nId invalido";
-        //TODO eliminar pagamento
-        return "\nPagamento adicionado com sucesso";
+        if(!db.verificaId(arr[1], "pagamento"))
+            return "\nId invalido";
+        if(db.eliminarDespesa(arr[1]))
+            return "\nDespesa eliminada com sucesso";
+        return "\n Nao foi possivel eliminar a pagamento";
+
     }
 
     /**
