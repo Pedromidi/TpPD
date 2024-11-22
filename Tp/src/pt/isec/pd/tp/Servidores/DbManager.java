@@ -243,6 +243,55 @@ public class DbManager {
         }
     }
 
+    public boolean eliminarGrupodaDB(String grupo){
+        String eliminarPagamentos = "DELETE FROM pagamento WHERE nome_grupo = ?";
+        String eliminarElementos = "DElETE FROM elementos_grupo WHERE nome_grupo = ?";
+        String eliminarGrupo = "DELETE FROM grupo WHERE nome = ?";
+
+
+        try{
+            PreparedStatement pagamentos = connection.prepareStatement(eliminarPagamentos);
+            pagamentos.setString(1, grupo);
+            pagamentos.executeUpdate();
+            setLastQuery(eliminarPagamentos);
+            incDbVersion();
+
+            PreparedStatement elementos = connection.prepareStatement(eliminarElementos);
+            elementos.setString(1, grupo);
+            elementos.executeUpdate();
+            setLastQuery(eliminarElementos);
+            incDbVersion();
+
+            PreparedStatement ogrupo = connection.prepareStatement(eliminarGrupo);
+            ogrupo.setString(1, grupo);
+            ogrupo.executeUpdate();
+            setLastQuery(eliminarGrupo);
+            incDbVersion();
+            return true;
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
+
+    public boolean retiraEmailGrupo(String email, String grupo){
+        String query  = "DELETE FROM elementos_grupo WHERE email = ? AND nome_grupo = ?";
+
+        try (PreparedStatement stmt1 = connection.prepareStatement(query)) {
+            stmt1.setString(1, email);
+            stmt1.setString(2, grupo);
+            stmt1.executeUpdate();
+
+            setLastQuery(query);
+            incDbVersion();
+            return true;
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
+
 //Getters-----------------------------------------------------------------------------------------------------------------------
 
     public ArrayList<String> listaDespesas(String grupo){
@@ -444,8 +493,28 @@ public class DbManager {
 
         } catch (SQLException e) {
             e.printStackTrace();
+            return false;
         }
-        return false;
+    }
+
+    /**
+     * Verifica se a pessoa x tem alguma depesa associada no grupo
+     * @return true, existe
+     * @return false, nao existe
+     */
+    public boolean verificaDespesaPessoaGrupo(String email, String grupo){
+        String query = "SELECT EXISTS (select 1 FROM despesa WHERE nome_grupo = ? AND email_pagador = ?)";
+        try (PreparedStatement stmt = connection.prepareStatement(query)) {
+            stmt.setString(1, grupo);
+            stmt.setString(2, email);
+            ResultSet rs = stmt.executeQuery();
+
+            return rs.getBoolean(1);
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return false;
+        }
     }
 
 

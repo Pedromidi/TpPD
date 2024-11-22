@@ -86,7 +86,7 @@ public class AtendeCliente implements Runnable {
                 return eliminarGrupo(arr);
 
             case "12": //12
-                return sairGrupo();
+                return sairGrupo(arr);
 
             case "13": //13 <valor> <data> <quempagou> ;<partilhados>;<descricao>
                 return inserirDespesa(comando,arr);
@@ -296,6 +296,7 @@ public class AtendeCliente implements Runnable {
     public String  editarNomeGrupo(String[] arr){
         if(grupoAtual == null)
             return "Sem grupo atual selecionado. Por favor escolha um grupo";
+
         if(db.verificaGrupo(arr[1]))
             return "Nome de grupo indisponivel";
 
@@ -310,27 +311,35 @@ public class AtendeCliente implements Runnable {
     /**
      * Eliminação de um grupo e respetivos dados, desde que não exista qualquer conta por
      * saldar/valor em dívida (ou seja, não podem existir situações de o elemento X deve a
-     *  quantia Z ao elemento Y / o elemento Y tem a receber a quantia Z do elemento Y).
+     * quantia Z ao elemento Y / o elemento Y tem a receber a quantia Z do elemento Y).
      */
     public String  eliminarGrupo(String[] arr){
-        //TODO - verifica se existe grupo o na BD
-        //return "\nGrupo invalido";
-        //TODO - verificar condicoes para a eliminacao do grupo
-        //return "\nEste grupo nao pode ser eliminado";
-        //TODO - Eliminar grupo da BD
-        return "\nConvite criado com sucesso!";
+        if(!db.verificaPertenceGrupo(email,arr[1]))
+            return "\nNão pertence a este grupo o ou grupo nao existe... Tente novamente";
+
+        if(db.listaDespesas(arr[1]).size() > 0)
+            return "\nEste grupo nao pode ser eliminado. Ainda existem despesas...";
+
+        if(db.eliminarGrupodaDB(arr[1]))
+            return "\nGrupo eliminado com sucesso!";
+
+        return "\nOcorreu um erro ao eliminar o grupo...";
     }
 
     /**
      * Saída de um grupo se ainda não existir qualquer despesa associada ao utilizador;
      */
-    public String sairGrupo(){
-        //TODO - verificar se utilizador está no grupo
-        //return "\nGrupo invalido";
-        //TODO - verificar condicoes para a eliminacao do grupo
-        //return "\nNao pode sair deste grupo! em dividas...";
-        //TODO - Eliminar grupo no cliente
-        return "\nConvite criado com sucesso!";
+    public String sairGrupo(String[] arr){
+        if(!db.verificaPertenceGrupo(email,arr[1]))
+            return "\nNão pertence a este grupo o ou grupo nao existe... Tente novamente";
+
+        if(db.verificaDespesaPessoaGrupo(email,arr[1]))
+            return "\nNão pode sair do grupo. Ainda tem despesas por liquidar...";
+
+        if(db.retiraEmailGrupo(email, arr[1]))
+            return "\nSaiu do grupo " + arr[1];
+
+        return "Ocorreu um erro ao tentar sair do grupo...";
     }
 
     /**
