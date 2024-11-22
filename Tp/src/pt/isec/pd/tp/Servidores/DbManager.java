@@ -174,6 +174,13 @@ public class DbManager {
             return false;
         }
     }
+
+    /**
+     * Nao funfa :(
+     * @param novoNome
+     * @param oldNome
+     * @return
+     */
     public boolean alteraNomeGrupo(String novoNome,String oldNome) { //nao funfa
         String query = "UPDATE grupo SET nome = ? WHERE nome = ?";
         try{
@@ -219,8 +226,6 @@ public class DbManager {
 
     /**
      * Elimina um pagamento da Base de Dados
-     * comeca por eliminar as suas dependencias (despesa_partilhada)
-     * e depois elimina da tabela despesa
      * @param id
      * @return
      */
@@ -310,11 +315,21 @@ public class DbManager {
         }
     }
 
+    public float somaDespesas(String grupo){
+        String query = "SELECT SUM(valor) FROM despesa WHERE nome_grupo = ?";
+        try{
+            PreparedStatement stmt = connection.prepareStatement(query);
+            stmt.setString(1,grupo);
 
-
-
-
+            ResultSet rs = stmt.executeQuery();
+            rs.getFloat(1);
+            return rs.getFloat(1);
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+    }
 //Verificacões------------------------------------------------------------------------------------------------------------------
+
     /**
      * Verifica se o email existe
      * com "SELECT EXISTS (select 1 FROM utilizador WHERE email = ?)"
@@ -337,7 +352,7 @@ public class DbManager {
     }
 
     /**
-     * Verifica se o email existe
+     * Verifica se a pass corresponde ao utilizador existe
      * com "SELECT EXISTS (select 1 FROM utilizador WHERE email = ? AND password = ?)"
      * A query devolve 1 se existir e 0 se nao existir
      * @return true, existe;  false, nao existe
@@ -415,7 +430,7 @@ public class DbManager {
     }
 
     /**
-     * Verifica se o nome do grupo existe na BD
+     * Verifica se o grupo existe na BD
      * @return true, existe
      * @return false, nao existe
      */

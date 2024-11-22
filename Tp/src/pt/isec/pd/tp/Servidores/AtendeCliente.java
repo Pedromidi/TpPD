@@ -71,13 +71,13 @@ public class AtendeCliente implements Runnable {
                 return criarConvite(arr);
 
             case "7": //7
-                return verConvites(arr);
+                return verConvites();
 
             case "8": //8 <idconvite> <resposta>
                 return responderConvite(arr);
 
             case "9": //listagrupo
-                return listarGrupos(arr);
+                return listarGrupos();
 
             case "10": //10 <novonome>
                 return editarNomeGrupo(arr);
@@ -85,20 +85,20 @@ public class AtendeCliente implements Runnable {
             case "11": //11 <nome>
                 return eliminarGrupo(arr);
 
-            case "12": //12 <grupo>
-                return sairGrupo(arr);
+            case "12": //12
+                return sairGrupo();
 
             case "13": //13 <valor> <data> <quempagou> ;<partilhados>;<descricao>
                 return inserirDespesa(comando,arr);
 
             case "14": //vergastos
-                return verGastos(arr);
+                return verGastos();
 
             case "15": //verhistoriocodespesas
                 return  verHistoricoDespesas();
 
-            case "16": //exportardespesas <grupoconcorrente>
-                return exportarDespesas(arr);
+            case "16": //exportardespesas
+                return exportarDespesas();
 
             case "17": //17 <id> <campoAeditar> <novoValor>
                 return  editarDespesa(comando,arr);
@@ -116,7 +116,7 @@ public class AtendeCliente implements Runnable {
                 return eliminarPagamento(arr);
 
             case "22": //versaldo
-                return  verSaldos(arr);
+                return  verSaldos();
         }
         return "";
     }
@@ -158,7 +158,6 @@ public class AtendeCliente implements Runnable {
             return "\nOcorreu um erro ao criar o seu registo. Por favor, tente novamente.";
         }
     }
-
 
 
     /**
@@ -262,7 +261,7 @@ public class AtendeCliente implements Runnable {
     /**
      *     Visualização automática e atualizada dos convites de adesão recebidos/pendentes
      */
-    public String verConvites (String[] arr){
+    public String verConvites (){
         //TODO listar convites
         return "Ainda por implementar :)";
     }
@@ -285,7 +284,7 @@ public class AtendeCliente implements Runnable {
     /**
      *  Lista dos grupos a que pertence o utilizador autenticado
      */
-    public String  listarGrupos (String[] arr){
+    public String  listarGrupos (){
         String lista = db.listaGrupos(email);
         return "\nLista de grupos: " + (lista.equals("")? "\nNão pertence a nenhum grupo.."
                 :lista);
@@ -325,7 +324,7 @@ public class AtendeCliente implements Runnable {
     /**
      * Saída de um grupo se ainda não existir qualquer despesa associada ao utilizador;
      */
-    public String sairGrupo(String[] arr){
+    public String sairGrupo(){
         //TODO - verificar se utilizador está no grupo
         //return "\nGrupo invalido";
         //TODO - verificar condicoes para a eliminacao do grupo
@@ -353,9 +352,14 @@ public class AtendeCliente implements Runnable {
     /**
      *Visualização do valor total de gastos efetuados pelo grupo corrente;
      */
-    public String  verGastos(String[] arr){
-        //TODO calcular gastos. Ir a BD no grupo atual e ver todos os clientes, ver despesas associadas aos clientes e somar?
-        return "Gastos total do grupo: Ainda nao sei :(";
+    public String  verGastos(){
+        if(grupoAtual == null)
+            return "\nSem grupo atual selecionado. Por favor escolha um grupo";
+
+        float result = db.somaDespesas(grupoAtual);
+        if(result > 0)
+            return "\nSoma das despesas do grupo: " + result + " Euros";
+        return "Não foi possivel calcular o valor...";
     }
 
     /**
@@ -385,7 +389,7 @@ public class AtendeCliente implements Runnable {
      *Exportação, para um ficheiro em formato CSV, da lista de despesas associadas ao
      *grupo corrente, ordenadas cronologicamente e detalhada (ver exemplo na Figura 1);
      */
-    public String  exportarDespesas(String[] arr){
+    public String  exportarDespesas(){
         //TODO servidor faz logica de exportar ja q é ele q tem acesso aos dados maybe
         return "\n....A teoria está lá... Nao testamos ainda...";
     }
@@ -477,7 +481,7 @@ public class AtendeCliente implements Runnable {
      *    o valor total que tem a receber;
      *    o valor que tem a receber de cada um dos restantes elementos;
      */
-    public String  verSaldos(String[] arr){
+    public String  verSaldos(){
         //TODO calcular saldos. Ir a BD no grupo atual
         return "Gastos total do grupo: Ainda nao sei :(";
     }
