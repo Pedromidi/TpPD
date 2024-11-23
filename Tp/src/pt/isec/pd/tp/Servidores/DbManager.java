@@ -337,6 +337,21 @@ public class DbManager {
         }
     }
 
+    public boolean adicionaPagamento(String quemPagou, String quemRecebeu, String data, String valor) {
+        String query = "INSERT INTO pagamentos (quem_pagou, quem_recebeu, data, valor) VALUES (?, ?, ?, ?)";
+        try (PreparedStatement stmt = connection.prepareStatement(query)) {
+            stmt.setString(1, quemPagou);
+            stmt.setString(2, quemRecebeu);
+            stmt.setString(3, data);
+            stmt.setString(4, valor);
+            stmt.executeUpdate();
+            return true;
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
+
 //Getters-----------------------------------------------------------------------------------------------------------------------
 
     public ArrayList<String> listaDespesas(String grupo){

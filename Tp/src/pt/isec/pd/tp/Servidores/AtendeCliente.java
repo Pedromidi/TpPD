@@ -506,12 +506,37 @@ public class AtendeCliente implements Runnable {
      * por um elemento do grupo corrente a outro elemento do mesmo grupo, com
      * indicação de: quem pagou; quem recebeu; data; e valor;
      */
-    public String  inserirPagamento(String[] arr){
+    public String inserirPagamento(String[] arr) {
+        String quemPagou = arr[1];   // Email de quem efetuou o pagamento
+        String quemRecebeu = arr[2]; // Email de quem recebeu o pagamento
+        String data = arr[3];        // Data do pagamento
+        String valor = arr[4];       // Valor do pagamento
+
+        // Verifica se os emails são válidos
+        if (!db.verificaEmail(quemPagou)) {
+            return "\nEmail de quem pagou é inválido.";
+        }
+        if (!db.verificaEmail(quemRecebeu)) {
+            return "\nEmail de quem recebeu é inválido.";
+        }
+
+        // Tenta inserir o pagamento na base de dados
+        boolean pagamentoInserido = db.adicionaPagamento(quemPagou, quemRecebeu, data, valor);
+
+        if (pagamentoInserido) {
+            return "\nPagamento adicionado com sucesso.";
+        } else {
+            return "\nNão foi possível adicionar o pagamento. Por favor, tenta novamente.";
+        }
+    }
+
+
+    /*public String  inserirPagamento(String[] arr){
         //TODO verificar se os emails sao validos
         //return "\nEmail invalido";
         //TODO adicionar pagamento
         return "\nPagamento adicionado com sucesso";
-    }
+    }*/
 
     /**
      * Listagem dos pagamentos efetuados entre elementos do grupo;
