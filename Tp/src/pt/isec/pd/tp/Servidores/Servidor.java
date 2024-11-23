@@ -6,6 +6,8 @@ import pt.isec.pd.tp.Grupo;
 import java.io.*;
 import java.net.*;
 
+import static java.lang.System.exit;
+
 public class Servidor {
     String nomeFicheiro = "test";
 
@@ -37,7 +39,13 @@ public class Servidor {
 
         try {
             DbManager manager =  new DbManager(args[1], args[2]);
-            System.out.println(manager.connect());
+            String result = manager.connect();
+            System.out.println(result);
+
+            if(!result.contains("estabelecida!")){
+                System.out.println("Não foi possivel estabelecer ligação a uma Base de Dados\n-----ABORTAR----- ");
+                exit(1);
+            }
 
             //Popular as variáveis com os valores dos args
             listeningPort = Integer.parseInt(args[0]);

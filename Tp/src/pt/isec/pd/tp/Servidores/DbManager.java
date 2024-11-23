@@ -1,6 +1,7 @@
 package pt.isec.pd.tp.Servidores;
 
 import java.io.File;
+import java.io.IOException;
 import java.sql.*;
 import java.util.ArrayList;
 
@@ -24,13 +25,95 @@ public class DbManager {
 
     public String connect (){
         try {
-            connection = DriverManager.getConnection(dbPath);
+            connection = DriverManager.getConnection(dbPath); //se nao encontra ao ficheiro cria um novo
             connection.setAutoCommit(true);
-            return "Connection to SQLite has been established.";
 
-        } catch (SQLException e) {
+            if(connection == null) return "Falha na Conexão a Base de Dados";
+
+            criaTabelasBD();
+
+            return "Conexão com a Base de Dados estabelecida!";
+
+        } catch (SQLException e) { //se não conseguir conetar
             return e.getMessage();
         }
+    }
+
+    /**
+     * Crias as tabelas se elas nao existirem (foi criada uma nova BD )
+     * Depois de criadas coloca o valor zero na versão da tabela.
+     */
+    public void criaTabelasBD() throws SQLException {
+            Statement statement = connection.createStatement();
+
+            statement.execute("CREATE TABLE IF NOT EXISTS \"grupo\" (\n" +
+                    "\t\"nome\"\tTEXT NOT NULL UNIQUE,\n" +
+                    "\tPRIMARY KEY(\"nome\")\n" +
+                    ");");
+
+            statement.execute("CREATE TABLE IF NOT EXISTS \"utilizador\" (\n" +
+                    "\t\"email\"\tTEXT NOT NULL UNIQUE,\n" +
+                    "\t\"nome\"\tTEXT NOT NULL,\n" +
+                    "\t\"telefone\"\tINTEGER NOT NULL UNIQUE,\n" +
+                    "\t\"password\"\tTEXT NOT NULL,\n" +
+                    "\tPRIMARY KEY(\"email\")\n" +
+                    ");");
+
+            statement.execute("CREATE TABLE IF NOT EXISTS \"elementos_grupo\" (\n" +
+                    "\t\"nome_grupo\"\tTEXT NOT NULL,\n" +
+                    "\t\"email\"\tTEXT NOT NULL,\n" +
+                    "\tPRIMARY KEY(\"nome_grupo\",\"email\"),\n" +
+                    "\tFOREIGN KEY(\"email\") REFERENCES \"utilizador\"(\"email\") ON UPDATE CASCADE,\n" +
+                    "\tFOREIGN KEY(\"nome_grupo\") REFERENCES \"grupo\"(\"nome\") ON UPDATE CASCADE\n" +
+                    ");");
+
+            statement.execute("CREATE TABLE IF NOT EXISTS \"pagamento\" (\n" +
+                    "\t\"id\"\tINTEGER NOT NULL UNIQUE,\n" +
+                    "\t\"data\"\tTEXT NOT NULL,\n" +
+                    "\t\"valor\"\tREAL NOT NULL,\n" +
+                    "\t\"nome_grupo\"\tTEXT NOT NULL,\n" +
+                    "\t\"email_recetor\"\tTEXT NOT NULL,\n" +
+                    "\t\"email_pagador\"\tTEXT NOT NULL,\n" +
+                    "\tPRIMARY KEY(\"id\" AUTOINCREMENT),\n" +
+                    "\tFOREIGN KEY(\"email_pagador\") REFERENCES \"utilizador\"(\"email\") ON UPDATE CASCADE,\n" +
+                    "\tFOREIGN KEY(\"email_recetor\") REFERENCES \"utilizador\"(\"email\") ON UPDATE CASCADE,\n" +
+                    "\tFOREIGN KEY(\"nome_grupo\") REFERENCES \"grupo\"(\"nome\") ON UPDATE CASCADE\n" +
+                    ");");
+
+            statement.execute("CREATE TABLE IF NOT EXISTS \"despesa\" (\n" +
+                    "\t\"id\"\tINTEGER NOT NULL UNIQUE,\n" +
+                    "\t\"data\"\tTEXT NOT NULL,\n" +
+                    "\t\"valor\"\tREAL NOT NULL,\n" +
+                    "\t\"descricao\"\tTEXT NOT NULL,\n" +
+                    "\t\"nome_grupo\"\tTEXT NOT NULL,\n" +
+                    "\t\"email_criador\"\tTEXT NOT NULL,\n" +
+                    "\t\"email_pagador\"\tTEXT NOT NULL,\n" +
+                    "\tPRIMARY KEY(\"id\" AUTOINCREMENT),\n" +
+                    "\tFOREIGN KEY(\"email_criador\") REFERENCES \"utilizador\"(\"email\") ON UPDATE CASCADE,\n" +
+                    "\tFOREIGN KEY(\"email_pagador\") REFERENCES \"utilizador\"(\"email\") ON UPDATE CASCADE,\n" +
+                    "\tFOREIGN KEY(\"nome_grupo\") REFERENCES \"grupo\"(\"nome\") ON UPDATE CASCADE\n" +
+                    ");");
+
+            statement.execute("CREATE TABLE IF NOT EXISTS \"despesa_partilhada\" (\n" +
+                    "\t\"email\"\tTEXT NOT NULL,\n" +
+                    "\t\"id_despesa\"\tINTEGER NOT NULL,\n" +
+                    "\tPRIMARY KEY(\"email\",\"id_despesa\"),\n" +
+                    "\tFOREIGN KEY(\"email\") REFERENCES \"utilizador\"(\"email\") ON UPDATE CASCADE,\n" +
+                    "\tFOREIGN KEY(\"id_despesa\") REFERENCES \"despesa\"(\"id\") ON UPDATE CASCADE\n" +
+                    ");");
+
+            statement.execute("CREATE TABLE IF NOT EXISTS \"versao\" (\n" +
+                    "\t\"numero\"\tINTEGER NOT NULL UNIQUE,\n" +
+                    "\tPRIMARY KEY(\"numero\")\n" +
+                    ");");
+
+        String query = "SELECT * FROM versao"; // se houver versão é porque e tabela já exitia
+        ResultSet resultSet = statement.executeQuery(query);
+        if (resultSet.next())
+            return;
+
+        statement.execute("INSERT INTO versao (numero) VALUES (0)");
+
     }
 
     public int getDbVersion() {
