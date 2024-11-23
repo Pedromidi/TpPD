@@ -387,8 +387,8 @@ public class ClienteUI {
                             System.out.println("2. Descricao ");
                             System.out.println("3. Valor ");
                             System.out.println("4. Quem pagou ");
-                            System.out.println("5. Adicionar elemento partilhado (<nome> <nome> ...)");
-                            System.out.println("6. Eliminar elemento partilhado (<nome> <nome> ...)");
+                            System.out.println("5. Adicionar elemento partilhado (<email> <email> ...)");
+                            System.out.println("6. Eliminar elemento partilhado (<email> <email> ...)");
                             System.out.print("7. Cancelar\n> ");
 
                             int campo = 0;

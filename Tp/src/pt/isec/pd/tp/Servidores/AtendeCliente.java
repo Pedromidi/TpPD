@@ -390,7 +390,7 @@ public class AtendeCliente implements Runnable {
         StringBuilder quemNaodeu = new StringBuilder("\nEmail(s) de partilha invalido(s). Não foi partilhada a despesa com :\n");
         boolean uh = false;
         for (String email_partilha: partilhados) {
-            if(!db.verificaPertenceGrupo(email_partilha,grupoAtual)||!db.adicionaDespesaPartilhada(id, email_partilha)){
+            if(!db.verificaPertenceGrupo(email_partilha,grupoAtual)||!db.adicionaDespesaPartilhada(""+id, email_partilha)){
                 quemNaodeu.append("\n - " + email_partilha);
                 uh = true;
             }
@@ -489,16 +489,28 @@ public class AtendeCliente implements Runnable {
                 if(db.alteraCampoDespesa(arr[1], "email_pagador",ast[1]))
                     return "\nEmail alterada com sucesso!";
                 return "\nNão foi possivel alterar o email";
+
             case "5":
-                //TODO - verifica se existe(m) o(s) email(s) na BD
-                //return "\nEmail invalido";
-                //TODO - altera password na BD
-                break;
+                StringBuilder quemNaodeu = new StringBuilder("\nNão foi partilhada a despesa com o(s) email(s):");
+                boolean uh = false;
+                for (String email_partilha: partilhados) {
+                    if(!db.verificaPertenceGrupo(email_partilha,grupoAtual)||!db.adicionaDespesaPartilhada(arr[1], email_partilha)){
+                        quemNaodeu.append("\n - " + email_partilha);
+                        uh = true;
+                    }
+                }
+                return  (uh ? quemNaodeu.toString() : "\nPartilha alterada com sucesso!");
+
             case "6":
-                //TODO - verifica se existe(m) o(s) email(s) na BD
-                //return "\nEmail invalido";
-                //TODO - altera password na BD
-                break;
+                StringBuilder quemNaodeu2 = new StringBuilder("\nNão foram retiradas as partilhas com os emails:");
+                boolean uh2 = false;
+                for (String email_partilha: partilhados) {
+                    if(!db.verificaPertenceGrupo(email_partilha,grupoAtual)||!db.removeDespesaPartilhada(arr[1], email_partilha)){
+                        quemNaodeu2.append("\n - " + email_partilha);
+                        uh2 = true;
+                    }
+                }
+                return  (uh2 ? quemNaodeu2.toString() : "\nPartilha alterada com sucesso!");
         }
         return "\nCampo alterado com sucesso!";
     }

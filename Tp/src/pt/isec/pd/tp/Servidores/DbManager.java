@@ -76,8 +76,8 @@ public class DbManager {
         this.updated = updated;
     }
 
-    //Alterações--------------------------------------------------------------------------------------------------------------------
-
+//Alterações--------------------------------------------------------------------------------------------------------------------
+    //Adicionar---------------------------------------------------------------------------------------------
     public boolean adicionaRegisto(String email, String nome, String telefone, String password){
         String query = "INSERT INTO utilizador (email, nome, telefone, password) VALUES (?, ?, ?, ?)";
         try (PreparedStatement stmt = connection.prepareStatement(query)) {
@@ -146,12 +146,12 @@ public class DbManager {
         }
     }
 
-    public boolean adicionaDespesaPartilhada(int id,String email_partilha){
+    public boolean adicionaDespesaPartilhada(String id,String email_partilha){
         String query = "INSERT INTO despesa_partilhada (id_despesa, email) VALUES (?, ?)";
 
         try{
             PreparedStatement stmt = connection.prepareStatement(query);
-            stmt.setInt(1, id);
+            stmt.setString(1, id);
             stmt.setString(2, email_partilha);
 
             stmt.executeUpdate();
@@ -184,6 +184,7 @@ public class DbManager {
         }
     }
 
+    //Alterar-------------------------------------------------------------------------------------------
     public boolean alteraCampoPerfil(String email, String campo,String novaPassword) { // email, nome, telefone, password
         String query = "UPDATE utilizador SET "+ campo +" = ? WHERE email = ?";
         try (PreparedStatement stmt = connection.prepareStatement(query)) {
@@ -236,7 +237,7 @@ public class DbManager {
         }
     }
 
-
+    //Eliminar----------------------------------------------------------------------------------------
 
     /**
      * Elimina uma despesa da Base de Dados
@@ -334,6 +335,25 @@ public class DbManager {
         }
     }
 
+    public boolean removeDespesaPartilhada(String id,String email_partilha){
+        String query = "DELETE FROM despesa_partilhada WHERE id_despesa = ? AND email = ?";
+
+        try{
+            PreparedStatement stmt = connection.prepareStatement(query);
+            stmt.setString(1, id);
+            stmt.setString(2, email_partilha);
+
+            stmt.executeUpdate();
+            incDbVersion();
+            setLastQuery(query);
+
+            return true;
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
+
 //Getters-----------------------------------------------------------------------------------------------------------------------
 
     public ArrayList<String> listaDespesas(String grupo){
@@ -419,6 +439,7 @@ public class DbManager {
             throw new RuntimeException(e);
         }
     }
+
 //Verificacões------------------------------------------------------------------------------------------------------------------
 
     /**
