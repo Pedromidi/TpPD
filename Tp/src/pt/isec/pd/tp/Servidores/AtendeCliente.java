@@ -183,8 +183,9 @@ public class AtendeCliente implements Runnable {
 
         switch (arr[1]) {
             case "1" -> { // Alterar nome
-                boolean alterouNome = db.alteraCampoPerfil(email,"nome" ,arr[2]);
+                boolean alterouNome = db.alteraNome(email, arr[2]);
                 if (alterouNome) {
+                    db.incDbVersion();
                     return "\nNome alterado com sucesso!";
                 } else {
                     return "\nOcorreu um erro ao alterar o nome.";
@@ -194,8 +195,9 @@ public class AtendeCliente implements Runnable {
                 if (db.verificaTelefone(arr[2])) {
                     return "\nNúmero de telefone inválido.";
                 }
-                boolean alterouTelefone = db.alteraCampoPerfil(email,"telefone" ,arr[2]);
+                boolean alterouTelefone = db.alteraTelefone(email, arr[2]);
                 if (alterouTelefone) {
+                    db.incDbVersion();
                     return "\nTelefone alterado com sucesso!";
                 } else {
                     return "\nOcorreu um erro ao alterar o telefone.";
@@ -205,8 +207,9 @@ public class AtendeCliente implements Runnable {
                 if (db.verificaEmail(arr[2])) {
                     return "\nEmail inválido.";
                 }
-                boolean alterouEmail = db.alteraCampoPerfil(email,"email" ,arr[2]);
+                boolean alterouEmail = db.alteraEmail(email, arr[2]);
                 if (alterouEmail) {
+                    db.incDbVersion();
                     email = arr[2];
                     return "\nEmail alterado com sucesso!";
                 } else {
@@ -214,8 +217,9 @@ public class AtendeCliente implements Runnable {
                 }
             }
             case "4" -> { // Alterar password
-                boolean alterouPassword = db.alteraCampoPerfil(email,"password" ,arr[2]);
+                boolean alterouPassword = db.alteraPassword(email, arr[2]);
                 if (alterouPassword) {
+                    db.incDbVersion();
                     return "\nPassword alterada com sucesso!";
                 } else {
                     return "\nOcorreu um erro ao alterar a password.";
@@ -335,11 +339,8 @@ public class AtendeCliente implements Runnable {
         if(db.listaDespesas(arr[1]).size() > 0)
             return "\nEste grupo nao pode ser eliminado. Ainda existem despesas...";
 
-        if(db.eliminarGrupodaDB(arr[1])){
-            grupoAtual = null;
+        if(db.eliminarGrupodaDB(arr[1]))
             return "\nGrupo eliminado com sucesso!";
-        }
-
 
         return "\nOcorreu um erro ao eliminar o grupo...";
     }
@@ -387,7 +388,7 @@ public class AtendeCliente implements Runnable {
             return "\n Não foi possivel adicionar a despesa";
         }
 
-        StringBuilder quemNaodeu = new StringBuilder("\nEmail(s) de partilha invalido(s). Não foi partilhada a despesa com :");
+        StringBuilder quemNaodeu = new StringBuilder("\nEmail(s) de partilha invalido(s). Não foi partilhada a despesa com :\n");
         boolean uh = false;
         for (String email_partilha: partilhados) {
             if(!db.verificaPertenceGrupo(email_partilha,grupoAtual)||!db.adicionaDespesaPartilhada(id, email_partilha)){
@@ -395,7 +396,7 @@ public class AtendeCliente implements Runnable {
                 uh = true;
             }
         }
-        return "\nDespesa adicionada com sucesso!" + (uh ? quemNaodeu : "\nPartilhado com todos!");
+        return "\nDespesa adicionada com sucesso!" + (uh?quemNaodeu:"\nPartilhado com todos!");
     }
 
     /**
@@ -459,48 +460,29 @@ public class AtendeCliente implements Runnable {
     /**
      *Edição dos campos de uma despesa já introduzida no sistema;
      */
-    public String  editarDespesa(String comando, String[] arr){ //arr[1]- id, arr[2]-campo, ast[1]-valor
-        String[] ast = comando.split(";"); //
+    public String  editarDespesa(String comando, String[] arr){
 
-        ast[1] = ast[1].toLowerCase();
-        String partilhados[] = ast[1].split(" "); //case 5 e 6
-        if(!db.verificaId(arr[1], "despesa"))
-            return "\nId invalido";
-
-        switch (arr[2]){
+        //TODO - verifica na BD se o id é valido, arr[1]
+        //return "\Id invalido";
+        switch (arr[1]){
             case "1":
-                if(db.alteraCampoDespesa(arr[1], "data", ast[1]))
-                    return "Data alterada com sucesso";
-                return "Não foi possivel alterar a data...";
-
+                //TODO - altera data na BD
+                break;
             case "2":
-                if(db.alteraCampoDespesa(arr[1], "descricao",ast[1]))
-                    return "Descrição alterada com sucesso";
-                return "Não foi possivel alterar a descrição...";
-
+                //TODO - altera descricao na BD
+                break;
             case "3":
-                if(db.alteraCampoDespesa(arr[1], "valor",ast[1]))
-                    return "Valor alterado com sucesso";
-                return "Não foi possivel alterar o valor...";
-
+                //TODO - altera valor na BD
+                break;
             case "4":
-                if(!db.verificaPertenceGrupo(arr[1],grupoAtual))
-                    return "\nEmail invalido";
-
-                if(db.alteraCampoDespesa(arr[1], "email_pagador",ast[1]))
-                    return "Valor alterado com sucesso";
-                return "Não foi possivel alterar o valor...";
-
+                //TODO - verifica se existe o email na BD
+                //return "\nEmail invalido";
+                //TODO - altera quemPagou na BD
+                break;
             case "5":
                 //TODO - verifica se existe(m) o(s) email(s) na BD
                 //return "\nEmail invalido";
                 //TODO - altera password na BD
-                break;
-            case "6":
-                //TODO - verifica se existe(m) o(s) email(s) na BD
-                //return "\nEmail invalido";
-                //TODO - altera password na BD
-
                 break;
         }
         return "\nCampo alterado com sucesso!";
@@ -530,9 +512,6 @@ public class AtendeCliente implements Runnable {
         String data = arr[3];        // Data do pagamento
         String valor = arr[4];       // Valor do pagamento
 
-        if(grupoAtual == null)
-            return "\nSem grupo atual selecionado. Por favor escolha um grupo";
-
         // Verifica se os emails são válidos
         if (!db.verificaEmail(quemPagou)) {
             return "\nEmail de quem pagou é inválido.";
@@ -542,7 +521,7 @@ public class AtendeCliente implements Runnable {
         }
 
         // Tenta inserir o pagamento na base de dados
-        boolean pagamentoInserido = db.adicionaPagamento(quemPagou, quemRecebeu, data, valor, grupoAtual);
+        boolean pagamentoInserido = db.adicionaPagamento(quemPagou, quemRecebeu, data, valor);
 
         if (pagamentoInserido) {
             return "\nPagamento adicionado com sucesso.";
@@ -551,12 +530,20 @@ public class AtendeCliente implements Runnable {
         }
     }
 
+
+    /*public String  inserirPagamento(String[] arr){
+        //TODO verificar se os emails sao validos
+        //return "\nEmail invalido";
+        //TODO adicionar pagamento
+        return "\nPagamento adicionado com sucesso";
+    }*/
+
     /**
      * Listagem dos pagamentos efetuados entre elementos do grupo;
      */
     public String  verPagamentos(){
         if(grupoAtual == null)
-            return "\nSem grupo atual selecionado. Por favor escolha um grupo";
+            return "\n Sem grupo atual selecionado. Por favor escolha um grupo";
 
         String ret = db.listaPagamentos(grupoAtual);
         return "\nLista de pagamentos: "
