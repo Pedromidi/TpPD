@@ -145,6 +145,7 @@ public class DbManager {
             return -1; // Falha
         }
     }
+
     public boolean adicionaDespesaPartilhada(int id,String email_partilha){
         String query = "INSERT INTO despesa_partilhada (id_despesa, email) VALUES (?, ?)";
 
@@ -164,14 +165,18 @@ public class DbManager {
         }
     }
 
-    public boolean alteraNome(String email, String novoNome) {
-        String query = "UPDATE utilizador SET nome = ? WHERE email = ?";
-
+    public boolean adicionaPagamento(String quemPagou, String quemRecebeu, String data, String valor, String grupo) {
+        String query = "INSERT INTO pagamento (email_pagador, email_recetor, data, valor,nome_grupo) VALUES (?, ?, ?, ?, ?)";
         try (PreparedStatement stmt = connection.prepareStatement(query)) {
-            stmt.setString(1, novoNome);
-            stmt.setString(2, email);
+            stmt.setString(1, quemPagou);
+            stmt.setString(2, quemRecebeu);
+            stmt.setString(3, data);
+            stmt.setString(4, valor);
+            stmt.setString(5, grupo);
             stmt.executeUpdate();
+
             setLastQuery(query);
+            incDbVersion();
             return true;
         } catch (SQLException e) {
             e.printStackTrace();
@@ -179,40 +184,14 @@ public class DbManager {
         }
     }
 
-    public boolean alteraTelefone(String email, String novoTelefone) {
-        String query = "UPDATE utilizador SET telefone = ? WHERE email = ?";
-        try (PreparedStatement stmt = connection.prepareStatement(query)) {
-            stmt.setString(1, novoTelefone);
-            stmt.setString(2, email);
-            stmt.executeUpdate();
-            setLastQuery(query);
-            return true;
-        } catch (SQLException e) {
-            e.printStackTrace();
-            return false;
-        }
-    }
-
-    public boolean alteraEmail(String email, String novoEmail) {
-        String query = "UPDATE utilizador SET email = ? WHERE email = ?";
-        try (PreparedStatement stmt = connection.prepareStatement(query)) {
-            stmt.setString(1, novoEmail);
-            stmt.setString(2, email);
-            stmt.executeUpdate();
-            return true;
-        } catch (SQLException e) {
-            e.printStackTrace();
-            return false;
-        }
-    }
-
-    public boolean alteraPassword(String email, String novaPassword) {
-        String query = "UPDATE utilizador SET password = ? WHERE email = ?";
+    public boolean alteraCampoPerfil(String email, String campo,String novaPassword) { // email, nome, telefone, password
+        String query = "UPDATE utilizador SET "+ campo +" = ? WHERE email = ?";
         try (PreparedStatement stmt = connection.prepareStatement(query)) {
             stmt.setString(1, novaPassword);
             stmt.setString(2, email);
             stmt.executeUpdate();
             setLastQuery(query);
+            incDbVersion();
             return true;
         } catch (SQLException e) {
             e.printStackTrace();
@@ -240,6 +219,25 @@ public class DbManager {
             return false;
         }
     }
+
+    public boolean alteraCampoDespesa(String id, String campo, String data){ //data,descricao,valor,email_pagador
+        String query = "UPDATE despesa SET "+ campo +" = ? WHERE id = ?";
+        try {
+            PreparedStatement stmt = connection.prepareStatement(query);
+            stmt.setString(1, data);
+            stmt.setString(2, id);
+            stmt.executeUpdate();
+
+            incDbVersion();
+            setLastQuery(query);
+            return true;
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
+
+
 
     /**
      * Elimina uma despesa da Base de Dados
@@ -337,27 +335,12 @@ public class DbManager {
         }
     }
 
-    public boolean adicionaPagamento(String quemPagou, String quemRecebeu, String data, String valor) {
-        String query = "INSERT INTO pagamentos (quem_pagou, quem_recebeu, data, valor) VALUES (?, ?, ?, ?)";
-        try (PreparedStatement stmt = connection.prepareStatement(query)) {
-            stmt.setString(1, quemPagou);
-            stmt.setString(2, quemRecebeu);
-            stmt.setString(3, data);
-            stmt.setString(4, valor);
-            stmt.executeUpdate();
-            return true;
-        } catch (SQLException e) {
-            e.printStackTrace();
-            return false;
-        }
-    }
-
 //Getters-----------------------------------------------------------------------------------------------------------------------
 
     public ArrayList<String> listaDespesas(String grupo){
 
         String query = "SELECT * FROM despesa WHERE nome_grupo = ?";
-        String query_partilhados = "SELECT email FROM despesa_partilhada where id_despesa = ?";
+        String query_partilhados = "SELECT email FROM despesa_partilhada WHERE id_despesa = ?";
         try{
             PreparedStatement stmt = connection.prepareStatement(query);
             PreparedStatement stmt_partilhados = connection.prepareStatement(query_partilhados);
@@ -371,10 +354,10 @@ public class DbManager {
 
                 ResultSet rs_partilhados = stmt_partilhados.executeQuery();
                 while(rs_partilhados.next()){
-                    partilhados.append(rs.getString(1)+" ");
+                    partilhados.append(rs_partilhados.getString(1)+" ");
                 }
 
-                list.add("\n - " + rs.getInt(1) + ", Data: "+ rs.getString(2) + ", Valor:"+rs.getFloat(3)+
+                list.add("\n - " + rs.getInt(1) + ", Data: "+ rs.getString(2) + ", Valor: "+rs.getFloat(3)+
                          "\n    Quem Inseriu: "+rs.getString(6)+ ", Quem Pagou: "+rs.getString(7)+
                          "\n    Partilhado com: " + partilhados +
                          "\n    Descricao: " + rs.getString(4));
@@ -397,7 +380,7 @@ public class DbManager {
             StringBuilder list = new StringBuilder();
             ResultSet rs = stmt.executeQuery();
             while(rs.next()){
-                list.append("\n - ").append(rs.getInt(1)).append(", Data: ").append(rs.getString(2)).append(", Valor:").append(rs.getFloat(3))
+                list.append("\n - ").append(rs.getInt(1)).append(", Data: ").append(rs.getString(2)).append(", Valor: ").append(rs.getFloat(3))
                                     .append("\n    Quem Recebeu: ").append(rs.getString(5)).append(", Quem Pagou: ").append(rs.getString(6));
             }
             return list.toString();

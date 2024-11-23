@@ -387,30 +387,32 @@ public class ClienteUI {
                             System.out.println("2. Descricao ");
                             System.out.println("3. Valor ");
                             System.out.println("4. Quem pagou ");
-                            System.out.println("5. Elementos partilhados (<nome> <nome> ...) ");
-                            System.out.print("6. Cancelar\n> ");
+                            System.out.println("5. Adicionar elemeto partilhado (<nome> <nome> ...) ");
+                            System.out.println("6. Eliminar elemeto partilhado (<nome> <nome> ...)");
+                            System.out.print("7. Cancelar\n> ");
 
                             int campo = 0;
                             do {
                                 try{
                                     campo = input.nextInt();
 
-                                    if (campo < 1 || campo > 6) { // se a excecao for lancada este if n é executado (acho...)
+                                    if (campo < 1 || campo > 7) { // se a excecao for lancada este if n é executado
                                         System.out.print("Opcao invalida. Por favor escolha novamente\n> ");
                                     }
                                 }catch (InputMismatchException e){
-                                    System.out.print("Opcao invalida. Por favor escolha 1 ou 2\n> ");
+                                    System.out.print("Opcao invalida. Por favor escolha de 1 a 7\n> ");
                                     input.nextLine();
                                 }
-                            } while (campo < 1 || campo > 6);
+                            } while (campo < 1 || campo > 7);
 
-                            if (campo == 6) break;
+                            if (campo == 7) break;
 
+                            input.nextLine();
                             System.out.print("Novo valor: ");
                             String valor = input.nextLine();
 
                             //enviar ao server como edicao de  despesa - Codigo 17
-                            command = "17 " + id + " " + campo + " " + valor;
+                            command = "17 " + id + " " + campo + " ;" + valor;
                             res = enviaComando(command);
                             System.out.println(res);
                         }
