@@ -141,7 +141,7 @@ public class ClienteUI {
                 boolean continuar = true;  // Variável de controle para encerrar o loop
 
                 do {
-
+                    Thread.sleep(1500);
                     System.out.println("\n\nEscolha uma opção:");
 
                     System.out.println("1. Editar dados de registo"); // nao precisa de selecionar grupo atual
@@ -498,6 +498,8 @@ public class ClienteUI {
                 //logout ou servidor termina
                 desconectarDoServidor(socket);
                 System.out.println("Desconectado com sucesso.");
+            } catch (InterruptedException e) {
+                throw new RuntimeException(e);
             }
         } catch (UnknownHostException e) {
             System.out.println("Destino desconhecido:\n\t" + e);
