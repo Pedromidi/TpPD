@@ -339,19 +339,20 @@ public class ClienteUI {
                             String data = input.next();
                             System.out.print("Quem pagou: ");
                             String quem = input.next();
+                            input.nextLine();//flush
                             System.out.print("Elementos a partilhar (<email> <email> ...): ");
                             String comQuem = input.nextLine();
                             System.out.print("Descricao: ");
                             String descricao = input.nextLine();
 
-                            //enviar ao server como nova despesa - Codigo 9
+                            //enviar ao server como nova despesa - Codigo 15
                             command = "13 " + valor + " " + data + " " + quem + " ;" + comQuem + ";" + descricao;
 
                             res = enviaComando(command);
                             System.out.println(res);
                         }
                         case 12 -> {
-                            //enviar ao server como ver valor das despesas- Codigo 9
+                            //enviar ao server como ver valor das despesas- Codigo 14
                             command = "14";
                             res = enviaComando(command);
                             System.out.println(res);

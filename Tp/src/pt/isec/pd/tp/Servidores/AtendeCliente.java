@@ -55,77 +55,78 @@ public class AtendeCliente implements Runnable {
     public String VerificaComando(String comando) throws IOException {
         //login
         comando = comando.toLowerCase();
-        String arr[] = comando.split(" ");
+        String[] arr = comando.split(" ");
         //String firstWord = arr[0];
 
-        switch(arr[0]) {
-            case "1": //1 <email> <password>
+        switch (arr[0]) {
+            case "1" -> { //1 <email> <password>
                 clientSocket.setSoTimeout(0);
                 return login(arr);
-
-            case "2": //2 <email> <nome> <telefone> <password>
+            }
+            case "2" -> { //2 <email> <nome> <telefone> <password>
                 clientSocket.setSoTimeout(0);
                 return registar(arr);
-
-            case "3": //3 n <novoValor> <password>
+            }
+            case "3" -> { //3 n <novoValor> <password>
                 return editarPerfil(arr);
-
-            case "4": // 4 <novonome>
+            }
+            case "4" -> { // 4 <novonome>
                 return criarGrupo(arr);
-
-            case "5": //5 <novogrupo>
+            }
+            case "5" -> { //5 <novogrupo>
                 return trocarGrupoAtual(arr);
-
-            case "6": //6 <email>
+            }
+            case "6" -> { //6 <email>
                 return criarConvite(arr);
-
-            case "7": //7
+            }
+            case "7" -> { //7
                 return verConvites();
-
-            case "8": //8 <idconvite> <resposta>
+            }
+            case "8" -> { //8 <idconvite> <resposta>
                 return responderConvite(arr);
-
-            case "9": //listagrupo
+            }
+            case "9" -> { //listagrupo
                 return listarGrupos();
-
-            case "10": //10 <novonome>
+            }
+            case "10" -> { //10 <novonome>
                 return editarNomeGrupo(arr);
-
-            case "11": //11 <nome>
+            }
+            case "11" -> { //11 <nome>
                 return eliminarGrupo(arr);
-
-            case "12": //12
+            }
+            case "12" -> { //12
                 return sairGrupo(arr);
-
-            case "13": //13 <valor> <data> <quempagou> ;<partilhados>;<descricao>
-                return inserirDespesa(comando,arr);
-
-            case "14": //vergastos
+            }
+            case "13" -> { //13 <valor> <data> <quempagou> ;<partilhados>;<descricao>
+                return inserirDespesa(comando, arr);
+            }
+            case "14" -> { //vergastos
                 return verGastos();
-
-            case "15": //verhistoriocodespesas
-                return  verHistoricoDespesas();
-
-            case "16": //exportardespesas
+            }
+            case "15" -> { //verhistoriocodespesas
+                return verHistoricoDespesas();
+            }
+            case "16" -> { //exportardespesas
                 return exportarDespesas();
-
-            case "17": //17 <id> <campoAeditar> <novoValor>
-                return  editarDespesa(comando,arr);
-
-            case "18": //18 <id>
+            }
+            case "17" -> { //17 <id> <campoAeditar> <novoValor>
+                return editarDespesa(comando, arr);
+            }
+            case "18" -> { //18 <id>
                 return eliminarDespesa(arr);
-
-            case "19": // 19 <quemPagou> <quemrecebeu> <data> <valor>
+            }
+            case "19" -> { // 19 <quemPagou> <quemrecebeu> <data> <valor>
                 return inserirPagamento(arr);
-
-            case "20":
+            }
+            case "20" -> {
                 return verPagamentos();
-
-            case "21": //21 <id>
+            }
+            case "21" -> { //21 <id>
                 return eliminarPagamento(arr);
-
-            case "22": //versaldo
-                return  verSaldos();
+            }
+            case "22" -> { //versaldo
+                return verSaldos();
+            }
         }
         return "";
     }
@@ -170,7 +171,6 @@ public class AtendeCliente implements Runnable {
         }
     }
 
-
     /**
      * Edição dos dados de registo.
      * 0 - comando, 1 - campo, 2 - novocampo, 3 - pass
@@ -182,7 +182,7 @@ public class AtendeCliente implements Runnable {
         }
 
         switch (arr[1]) {
-            case "1": // Alterar nome
+            case "1" -> { // Alterar nome
                 boolean alterouNome = db.alteraNome(email, arr[2]);
                 if (alterouNome) {
                     db.incDbVersion();
@@ -190,8 +190,8 @@ public class AtendeCliente implements Runnable {
                 } else {
                     return "\nOcorreu um erro ao alterar o nome.";
                 }
-
-            case "2": // Alterar telefone
+            }
+            case "2" -> { // Alterar telefone
                 if (db.verificaTelefone(arr[2])) {
                     return "\nNúmero de telefone inválido.";
                 }
@@ -202,8 +202,8 @@ public class AtendeCliente implements Runnable {
                 } else {
                     return "\nOcorreu um erro ao alterar o telefone.";
                 }
-
-            case "3": // Alterar email
+            }
+            case "3" -> { // Alterar email
                 if (db.verificaEmail(arr[2])) {
                     return "\nEmail inválido.";
                 }
@@ -215,8 +215,8 @@ public class AtendeCliente implements Runnable {
                 } else {
                     return "\nOcorreu um erro ao alterar o email.";
                 }
-
-            case "4": // Alterar password
+            }
+            case "4" -> { // Alterar password
                 boolean alterouPassword = db.alteraPassword(email, arr[2]);
                 if (alterouPassword) {
                     db.incDbVersion();
@@ -224,12 +224,12 @@ public class AtendeCliente implements Runnable {
                 } else {
                     return "\nOcorreu um erro ao alterar a password.";
                 }
-
-            default:
+            }
+            default -> {
                 return "\nOpção inválida.";
+            }
         }
     }
-
 
     public String criarGrupo(String[] arr) {
 
@@ -365,16 +365,38 @@ public class AtendeCliente implements Runnable {
      *Inserção de uma despesa associada ao grupo corrente, por qualquer um dos seus
      * elementos, com: data; descrição; valor; quem pagou; e os elementos com quem é
      * partilhada (pode não incluir quem pagou);
+     *
+     * (arr) 1-valor, 2-data, 3-quemPagou
+     * ()
      */
     public String  inserirDespesa(String comando, String[] arr){
-        comando = comando.toUpperCase();
-        String ast[] = comando.split(";"); //ast[1] -> partilhados, ast[2]-> descricao
+        // valor data quem ;comQuemm;descricao
+        String[] ast = comando.split(";"); //ast[1] -> partilhados, ast[2]-> descricao
+
+        ast[1] = ast[1].toLowerCase();
         String partilhados[] = ast[1].split(" ");
 
-        //TODO - verificar se todos os emails existem (partilhados e quem pagou)
-        //return "\nEmail " + y + " invalido";
-        //TODO - adicionar na BD nova despesa
-        return "\nDespesa adicionada com sucesso!";
+
+        if(grupoAtual == null)
+            return "Sem grupo atual selecionado. Por favor escolha um grupo";
+
+        if(!db.verificaEmail(arr[3])){ //email pagador
+            return "\nEmail de quem pagou incorreto";
+        }
+        int id = db.adicionaDespesa(email,grupoAtual,arr[1],arr[2],arr[3],ast[2]);
+        if(id < 0){
+            return "\n Não foi possivel adicionar a despesa";
+        }
+
+        StringBuilder quemNaodeu = new StringBuilder("\nEmail(s) de partilha invalido(s). Não foi partilhada a despesa com :\n");
+        boolean uh = false;
+        for (String email_partilha: partilhados) {
+            if(!db.verificaPertenceGrupo(email_partilha,grupoAtual)||!db.adicionaDespesaPartilhada(id, email_partilha)){
+                quemNaodeu.append("\n - " + email_partilha);
+                uh = true;
+            }
+        }
+        return "\nDespesa adicionada com sucesso!" + (uh?quemNaodeu:"\nPartilhado com todos!");
     }
 
     /**
@@ -439,6 +461,7 @@ public class AtendeCliente implements Runnable {
      *Edição dos campos de uma despesa já introduzida no sistema;
      */
     public String  editarDespesa(String comando, String[] arr){
+
         //TODO - verifica na BD se o id é valido, arr[1]
         //return "\Id invalido";
         switch (arr[1]){

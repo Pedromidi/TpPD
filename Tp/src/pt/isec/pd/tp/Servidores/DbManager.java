@@ -94,6 +94,76 @@ public class DbManager {
         }
     }
 
+    public boolean criaGrupo(String criadorEmail, String nomeGrupo) {
+        String insertGrupo = "INSERT INTO grupo (nome) VALUES (?)";
+        String insertMembro = "INSERT INTO elementos_grupo (nome_grupo, email) VALUES (?, ?)";
+
+        try {
+            // Inserir
+            try (PreparedStatement stmtGrupo = connection.prepareStatement(insertGrupo)) {
+                stmtGrupo.setString(1, nomeGrupo);
+                stmtGrupo.executeUpdate();
+                setLastQuery(insertGrupo);
+            }
+            // Associar
+            try (PreparedStatement stmtMembro = connection.prepareStatement(insertMembro)) {
+                stmtMembro.setString(1, nomeGrupo);
+                stmtMembro.setString(2, criadorEmail);
+                stmtMembro.executeUpdate();
+                setLastQuery(insertMembro);
+            }
+            return true;
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
+
+    public int adicionaDespesa(String email, String grupo, String valor, String data, String email_pagador,String descricao){
+
+        String getnovoID = "SELECT MAX(id) FROM despesa";
+        String query = "INSERT INTO despesa (id, data, valor, descricao, nome_grupo, email_criador, email_pagador) VALUES (?, ?, ?, ?, ?, ?, ?)";
+
+        try{
+            PreparedStatement st = connection.prepareStatement(getnovoID);
+            ResultSet rs = st.executeQuery();
+
+            PreparedStatement stmt = connection.prepareStatement(query);
+            stmt.setInt(1, rs.getInt(1)+1);
+            stmt.setString(2, data);      stmt.setString(3, valor);
+            stmt.setString(4, descricao); stmt.setString(5, grupo);
+            stmt.setString(6, email);     stmt.setString(7, email_pagador);
+
+            stmt.executeUpdate();
+            incDbVersion();
+            setLastQuery(query);
+
+            return rs.getInt(1)+1;
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return -1; // Falha
+        }
+    }
+    public boolean adicionaDespesaPartilhada(int id,String email_partilha){
+        String query = "INSERT INTO despesa_partilhada (id_despesa, email) VALUES (?, ?)";
+
+        try{
+            PreparedStatement stmt = connection.prepareStatement(query);
+            stmt.setInt(1, id);
+            stmt.setString(2, email_partilha);
+
+            stmt.executeUpdate();
+            incDbVersion();
+            setLastQuery(query);
+
+            return true;
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
+
     public boolean alteraNome(String email, String novoNome) {
         String query = "UPDATE utilizador SET nome = ? WHERE email = ?";
 
@@ -143,31 +213,6 @@ public class DbManager {
             stmt.setString(2, email);
             stmt.executeUpdate();
             setLastQuery(query);
-            return true;
-        } catch (SQLException e) {
-            e.printStackTrace();
-            return false;
-        }
-    }
-
-    public boolean criaGrupo(String criadorEmail, String nomeGrupo) {
-        String insertGrupo = "INSERT INTO grupo (nome) VALUES (?)";
-        String insertMembro = "INSERT INTO elementos_grupo (nome_grupo, email) VALUES (?, ?)";
-
-        try {
-            // Inserir
-            try (PreparedStatement stmtGrupo = connection.prepareStatement(insertGrupo)) {
-                stmtGrupo.setString(1, nomeGrupo);
-                stmtGrupo.executeUpdate();
-                setLastQuery(insertGrupo);
-            }
-            // Associar
-            try (PreparedStatement stmtMembro = connection.prepareStatement(insertMembro)) {
-                stmtMembro.setString(1, nomeGrupo);
-                stmtMembro.setString(2, criadorEmail);
-                stmtMembro.executeUpdate();
-                setLastQuery(insertMembro);
-            }
             return true;
         } catch (SQLException e) {
             e.printStackTrace();
