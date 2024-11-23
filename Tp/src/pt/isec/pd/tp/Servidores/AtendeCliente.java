@@ -272,6 +272,7 @@ public class AtendeCliente implements Runnable {
         }
 
         Convite convite = new Convite(email, emailDestinatario, "Pendente");
+        //TODO guardar os convites
 
 
         return "\nConvite criado com sucesso!";
