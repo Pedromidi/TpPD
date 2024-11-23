@@ -2,6 +2,8 @@ package pt.isec.pd.tp.Servidores;
 
 //import pt.isec.pd.tp.MSG;
 
+import pt.isec.pd.tp.Convite;
+
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
@@ -262,10 +264,16 @@ public class AtendeCliente implements Runnable {
      *  Criação de convites para adesão a um grupo, sendo os destinatários identificados
      *  através dos seus emails de registo no sistema
      */
-    public String criarConvite (String[] arr){
-        //TODO - verifica se existe email o na BD
-        //return "\nEmail do destinatario invalido";
-        //TODO - criar convite e associar ao cliente do email. (Sem comunicacao com a BD)
+    public String criarConvite(String[] arr) {
+
+        String emailDestinatario = arr[1];
+        if (!db.verificaEmail(emailDestinatario)) {
+            return "\nEmail do destinatário inválido";
+        }
+
+        Convite convite = new Convite(email, emailDestinatario, "Pendente");
+
+
         return "\nConvite criado com sucesso!";
     }
 
@@ -387,20 +395,34 @@ public class AtendeCliente implements Runnable {
      * cronologicamente, com todos os detalhes, incluindo a identificação de quem a inseriu
      * no sistema (pode não ser quem efetuou a despesa);
      */
-    public String  verHistoricoDespesas(){
-        if(grupoAtual == null)
-            return "\n Sem grupo atual selecionado. Por favor escolha um grupo";
+    public String verHistoricoDespesas() {
+        if (grupoAtual == null)
+            return "\nSem grupo atual selecionado. Por favor escolha um grupo.";
 
-        //TODO ordenar por datas, (separar por espacos, ir ao elemento 5? e separar por / e pronto.. ordenar.. yay..)
+        // Obter lista de despesas do grupo atual
         ArrayList<String> despesas = db.listaDespesas(grupoAtual);
-        StringBuilder retu = new StringBuilder("\nHitorico de despesas do grupo ");//+ grupoAtual + ": " + despesas.toString();
 
-        if(despesas.size() == 0)
-            return retu + "\nNão há despesas a listar...";
+        // Verificar se existem despesas
+        if (despesas.size() == 0)
+            return "\nHistórico de despesas do grupo " + grupoAtual + ":\nNão há despesas a listar...";
+
+        // Ordenar despesas cronologicamente
+        despesas.sort((d1, d2) -> {
+            String[] detalhes1 = d1.split(";");
+            String[] detalhes2 = d2.split(";");
+            String data1 = detalhes1[0]; // Supõe que a data está na posição 0
+            String data2 = detalhes2[0];
+
+            return data1.compareTo(data2); // Ordenação ascendente
+        });
+
+        // Construir string com o histórico
+        StringBuilder retu = new StringBuilder("\nHistórico de despesas do grupo " + grupoAtual + ":\n");
 
         for (String despesa : despesas) {
-            retu.append(despesa);
+            retu.append(despesa).append("\n");
         }
+
         return retu.toString();
     }
 

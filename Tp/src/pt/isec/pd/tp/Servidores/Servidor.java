@@ -9,6 +9,7 @@ import java.net.*;
 public class Servidor {
     String nomeFicheiro = "test";
 
+
     //100% theory, test it at your own peril
     public void exportarDespesasParaCSV(Grupo grupo, String nomeFicheiro){
         try(FileWriter writer = new FileWriter(nomeFicheiro)){
