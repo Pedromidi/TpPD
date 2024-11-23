@@ -198,7 +198,6 @@ public class DbManager {
             return false;
         }
     }
-
     /**
      * Nao funfa :(
      * @param novoNome
@@ -358,9 +357,9 @@ public class DbManager {
                 }
 
                 list.add("\n - " + rs.getInt(1) + ", Data: "+ rs.getString(2) + ", Valor: "+rs.getFloat(3)+
-                         "\n    Quem Inseriu: "+rs.getString(6)+ ", Quem Pagou: "+rs.getString(7)+
-                         "\n    Partilhado com: " + partilhados +
-                         "\n    Descricao: " + rs.getString(4));
+                        "\n    Quem Inseriu: "+rs.getString(6)+ ", Quem Pagou: "+rs.getString(7)+
+                        "\n    Partilhado com: " + partilhados +
+                        "\n    Descricao: " + rs.getString(4));
             }
             return list;
 
@@ -381,7 +380,7 @@ public class DbManager {
             ResultSet rs = stmt.executeQuery();
             while(rs.next()){
                 list.append("\n - ").append(rs.getInt(1)).append(", Data: ").append(rs.getString(2)).append(", Valor: ").append(rs.getFloat(3))
-                                    .append("\n    Quem Recebeu: ").append(rs.getString(5)).append(", Quem Pagou: ").append(rs.getString(6));
+                        .append("\n    Quem Recebeu: ").append(rs.getString(5)).append(", Quem Pagou: ").append(rs.getString(6));
             }
             return list.toString();
 
