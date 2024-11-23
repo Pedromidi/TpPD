@@ -507,12 +507,12 @@ public class AtendeCliente implements Runnable {
      * indicação de: quem pagou; quem recebeu; data; e valor;
      */
     public String inserirPagamento(String[] arr) {
-        String quemPagou = arr[1];   // Email de quem efetuou o pagamento
-        String quemRecebeu = arr[2]; // Email de quem recebeu o pagamento
+        String quemPagou = arr[1];   // Email de quem efetuou
+        String quemRecebeu = arr[2]; // Email de quem recebeu
         String data = arr[3];        // Data do pagamento
         String valor = arr[4];       // Valor do pagamento
 
-        // Verifica se os emails são válidos
+
         if (!db.verificaEmail(quemPagou)) {
             return "\nEmail de quem pagou é inválido.";
         }
@@ -520,7 +520,6 @@ public class AtendeCliente implements Runnable {
             return "\nEmail de quem recebeu é inválido.";
         }
 
-        // Tenta inserir o pagamento na base de dados
         boolean pagamentoInserido = db.adicionaPagamento(quemPagou, quemRecebeu, data, valor);
 
         if (pagamentoInserido) {
