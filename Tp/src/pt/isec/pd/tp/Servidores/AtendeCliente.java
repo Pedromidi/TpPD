@@ -259,13 +259,19 @@ public class AtendeCliente implements Runnable {
      */
 
     public String criarConvite(String[] arr) {
-        if(!db.verificaEmail(arr[1])||db.verificaPertenceGrupo(email, arr[2]))
+        StringBuilder nomeGrupo = new StringBuilder();
+        for(int i = 2; i < arr.length; i++){
+            nomeGrupo.append(arr[i]);
+            if(i != arr.length-1)  nomeGrupo.append(" ");//nao mete espaco no ultimo
+        }
+
+        if(!db.verificaEmail(arr[1])||db.verificaPertenceGrupo(arr[1], nomeGrupo.toString()))
             return "\nEmail do utilizador indicado nao existe ou já pertence ao grupo";
 
-        if(!db.verificaPertenceGrupo(email, arr[2]))
-            return "\nNão pertence a este grupo o ou grupo nao existe";
+        if(!db.verificaPertenceGrupo(email, nomeGrupo.toString()))
+            return "\nNão pertence a este grupo ou o grupo nao existe";
 
-        if(!db.criaConvite(arr[1], arr[2]))
+        if(!db.criaConvite(arr[1], nomeGrupo.toString()))
             return "\nNão foi possível criar convite!";
 
         db.incDbVersion();
@@ -654,10 +660,17 @@ public class AtendeCliente implements Runnable {
         float result3 = db.CalculaTotalQueMeDevem(grupoAtual, email);
         if(result3 < 0) return "\nNão foi possivel calcular o valor total que deve receber";
 
+        String result4 = db.CalculaTotalQueMeDevemUmAUm(grupoAtual, email);
+        if(result4.equals("")) return "\nNão foi possivel calcular o valor total que tem a receber de cada um dos restantes elementos";
+
+        String result5 = db.CalculaDevidoAQuem(grupoAtual, email);
+        if(result5.equals("")) return "\nNão foi possivel calcular o valor total que deve a cada um dos restantes elemento";
 
         ret +=  "\nSoma das despesas do grupo: " + result + " Euros" +
                 "\nValor que deve: " + result2 + " Euros" +
-                "\nValor total que tem a receber: " + result3 + " Euros";
+                "\nValor total que deve a cada um dos restantes elementos:" + result5 +
+                "\nValor total que tem a receber: " + result3 + " Euros" +
+                "\nValor total que que tem a receber de cada um dos restantes elementos: " + result4;
 
         return ret;
     }

@@ -640,7 +640,7 @@ public class DbManager {
 
         String query = "SELECT id_despesa FROM despesa_partilhada WHERE email = ?";
         String numPrtilhas = "SELECT COUNT(email) FROM despesa_partilhada WHERE id_despesa = ? ";
-        String valor = "SELECT valor FROM despesa WHERE id = ?";
+        String valor = "SELECT valor FROM despesa WHERE id = ? AND nome_grupo = ?";
 
         float resultadoFinal = 0;
 
@@ -651,6 +651,7 @@ public class DbManager {
             PreparedStatement nPrtilhas = connection.prepareStatement(numPrtilhas);
 
             PreparedStatement valorD = connection.prepareStatement(valor);
+            valorD.setString(2,grupo);
 
             ResultSet rs = stmt.executeQuery();
 
@@ -691,6 +692,84 @@ public class DbManager {
         } catch (SQLException e) {
             e.printStackTrace();
             return -1;
+        }
+    }
+
+    public String CalculaTotalQueMeDevemUmAUm(String grupo, String email){
+        String query = "SELECT valor, id FROM despesa WHERE email_pagador = ? AND nome_grupo = ?";
+        String query2 = "SELECT email FROM despesa_partilhada WHERE id_despesa = ?";
+        String query3 = "SELECT COUNT(email) FROM despesa_partilhada WHERE id_despesa = ? ";
+
+        try{
+            PreparedStatement stmt = connection.prepareStatement(query);
+            stmt.setString(1,email);
+            stmt.setString(2,grupo);
+
+            PreparedStatement stmt2 = connection.prepareStatement(query2);
+            PreparedStatement stmt3 = connection.prepareStatement(query3);
+
+            ResultSet rs = stmt.executeQuery();
+            String result = "";
+
+            int AHH;
+
+            while(rs.next()){
+                stmt2.setInt(1,rs.getInt(2));
+                AHH = stmt3.executeQuery().getInt(1);
+                if( AHH == 0){
+                    AHH = 1;
+                }
+                result += "\n ->" + stmt2.executeQuery().getString(1) + " " + rs.getFloat(1) / AHH  + " Euros";
+            }
+
+            return result;
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return "";
+        }
+    }
+
+    public String CalculaDevidoAQuem(String grupo, String email){
+        String query = "SELECT id_despesa FROM despesa_partilhada WHERE email = ?";
+        String numPrtilhas = "SELECT COUNT(email) FROM despesa_partilhada WHERE id_despesa = ? ";
+        String valor = "SELECT valor, email_pagador FROM despesa WHERE id = ? AND nome_grupo = ? AND email_pagador <> ?";
+
+        float resultadoFinal =  0;
+
+        try{
+            PreparedStatement stmt = connection.prepareStatement(query);
+            stmt.setString(1,email);
+
+            PreparedStatement nPrtilhas = connection.prepareStatement(numPrtilhas);
+
+            PreparedStatement valorD = connection.prepareStatement(valor);
+            valorD.setString(2,grupo);
+            valorD.setString(3,email);
+
+            ResultSet rs = stmt.executeQuery();
+
+            String result = " ";
+
+            while (rs.next()){
+                nPrtilhas.setInt(1,rs.getInt(1));
+                int nPartilhas = nPrtilhas.executeQuery().getInt(1);
+
+                valorD.setInt(1,rs.getInt(1));
+                float valorTotal = valorD.executeQuery().getFloat(1);
+
+                float valorDespesa = valorTotal/nPartilhas;
+
+                if(valorDespesa != 0.0)
+                    result += "\n ->" + valorD.executeQuery().getString(2) + " " + valorDespesa + " Euros";
+
+            }
+
+            return result;
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return "";
         }
     }
 
