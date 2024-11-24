@@ -497,7 +497,7 @@ public class AtendeCliente implements Runnable {
     public String  editarDespesa(String comando, String[] arr){
 
         if (!db.verificaId(arr[1], "despesa"))
-            return "\nSem grupo atual selecionado. Por favor escolha um grupo.";
+            return "\nId Inválido";
 
         String[] ast = comando.split(";");
 
@@ -621,15 +621,27 @@ public class AtendeCliente implements Runnable {
 
     /**
      * Visualização dos saldos do grupo corrente com, para cada elemento, indicação do:
-     *    o gasto total;
-     *    o valor total que deve;
-     *    o valor que que deve a cada um dos restantes elementos;
+     *    o gasto total; ---
+     *    o valor total que deve; (todas as despesas partilhadas( ve quantos mais partilham desta depesa e divide o valor))
+     *    - o valor que que deve a cada um dos restantes elementos;
      *    o valor total que tem a receber;
      *    o valor que tem a receber de cada um dos restantes elementos;
      */
     public String  verSaldos(){
-        //TODO calcular saldos. Ir a BD no grupo atual
-        return "Gastos total do grupo: Ainda nao sei :(";
+        if (grupoAtual == null)
+            return "\nSem grupo atual selecionado. Por favor escolha um grupo.";
+
+        String ret = "Saldos do grupo " + grupoAtual;
+
+        float result = db.somaDespesas(grupoAtual);
+        if(result < 0) return "\nNão foi possivel calcular o valor da soma das Despesas...";
+
+        float result2 = db.CalculaTotalDevido(grupoAtual, email);
+
+        ret +=  "\nSoma das despesas do grupo: " + result + " Euros" +
+                "\nValor que deve: " + result2 + " Euros";
+
+        return ret;
     }
 
     private String getNomeGrupo(String [] arr){

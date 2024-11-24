@@ -284,12 +284,7 @@ public class DbManager {
             return false;
         }
     }
-    /**
-     * Nao funfa :(
-     * @param novoNome
-     * @param oldNome
-     * @return
-     */
+
     public boolean alteraNomeGrupo(String novoNome,String oldNome) { //nao funfa
         String query = "UPDATE grupo SET nome = ? WHERE nome = ?;";
         try{
@@ -510,21 +505,6 @@ public class DbManager {
             throw new RuntimeException(e);
         }
     }
-
-    public float somaDespesas(String grupo){
-        String query = "SELECT SUM(valor) FROM despesa WHERE nome_grupo = ?";
-        try{
-            PreparedStatement stmt = connection.prepareStatement(query);
-            stmt.setString(1,grupo);
-
-            ResultSet rs = stmt.executeQuery();
-            rs.getFloat(1);
-            return rs.getFloat(1);
-        } catch (SQLException e) {
-            throw new RuntimeException(e);
-        }
-    }
-
     public List<String[]> obterDespesas(String grupoNome) throws SQLException {
         String query = "SELECT id, descricao, valor, data, email_pagador FROM despesa WHERE nome_grupo = ?";
         String query_partilhados = "SELECT email FROM despesa_partilhada WHERE id_despesa = ?";
@@ -556,6 +536,61 @@ public class DbManager {
             }
         }
         return despesas;
+    }
+
+    public float somaDespesas(String grupo){
+        String query = "SELECT SUM(valor) FROM despesa WHERE nome_grupo = ?";
+        try{
+            PreparedStatement stmt = connection.prepareStatement(query);
+            stmt.setString(1,grupo);
+
+            ResultSet rs = stmt.executeQuery();
+            rs.getFloat(1);
+            return rs.getFloat(1);
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    /**
+     * Total que devo - vai a todas as despesas que sao partilhadas com o email e soma o valor
+     */
+    public float CalculaTotalDevido(String grupo, String email){
+
+        String query = "SELECT id_despesa FROM despesa_partilhada WHERE email = ?";
+        String numPrtilhas = "SELECT COUNT(email) FROM despesa_partilhada WHERE id_despesa = ? ";
+        String valor = "SELECT valor FROM despesa WHERE id = ?";
+
+        float resultadoFinal = 0;
+
+        try{
+            PreparedStatement stmt = connection.prepareStatement(query);
+            stmt.setString(1,email);
+
+            PreparedStatement nPrtilhas = connection.prepareStatement(numPrtilhas);
+
+            PreparedStatement valorD = connection.prepareStatement(valor);
+
+            ResultSet rs = stmt.executeQuery();
+
+            while (rs.next()){
+                nPrtilhas.setInt(1,rs.getInt(1));
+                int nPartilhas = nPrtilhas.executeQuery().getInt(1);
+
+                valorD.setInt(1,rs.getInt(1));
+                float valorTotal = valorD.executeQuery().getFloat(1);
+
+                float valorDespesa = valorTotal/nPartilhas;
+
+                resultadoFinal += valorDespesa;
+            }
+
+            return resultadoFinal;
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return -1;
+        }
     }
 
 

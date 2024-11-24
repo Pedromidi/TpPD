@@ -543,7 +543,7 @@ public class ClienteUI {
                         System.out.println(res);
                     }
                     case 20 -> {
-                        command = "21";
+                        command = "22";
                         res = enviaComando(command);
                         System.out.println(res);
                     }
