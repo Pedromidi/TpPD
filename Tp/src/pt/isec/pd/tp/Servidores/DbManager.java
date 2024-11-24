@@ -181,7 +181,6 @@ public class DbManager {
 
     public boolean criaGrupo(String criadorEmail, String nomeGrupo) {
         String insertGrupo = "INSERT INTO grupo (nome) VALUES (?)";
-        String insertMembro = "INSERT INTO elementos_grupo (nome_grupo, email) VALUES (?, ?)";
 
         try {
             // Inserir
@@ -189,16 +188,29 @@ public class DbManager {
                 stmtGrupo.setString(1, nomeGrupo);
                 stmtGrupo.executeUpdate();
                 setLastQuery(insertGrupo);
+                incDbVersion();
             }
-            // Associar
-            try (PreparedStatement stmtMembro = connection.prepareStatement(insertMembro)) {
-                stmtMembro.setString(1, nomeGrupo);
-                stmtMembro.setString(2, criadorEmail);
-                stmtMembro.executeUpdate();
-                setLastQuery(insertMembro);
-            }
-            return true;
+            return adicionaMembro(criadorEmail,nomeGrupo);
+
         } catch (SQLException e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
+
+    public boolean adicionaMembro(String email, String grupo){
+        String insertMembro = "INSERT INTO elementos_grupo (nome_grupo, email) VALUES (?, ?)";
+
+        try (PreparedStatement stmtMembro = connection.prepareStatement(insertMembro)) {
+            stmtMembro.setString(1, grupo);
+            stmtMembro.setString(2, email);
+            stmtMembro.executeUpdate();
+
+            setLastQuery(insertMembro);
+            incDbVersion();
+            return true;
+        }
+        catch (SQLException e) {
             e.printStackTrace();
             return false;
         }
@@ -266,6 +278,20 @@ public class DbManager {
         } catch (SQLException e) {
             e.printStackTrace();
             return false;
+        }
+    }
+
+    public boolean criaConvite(String email_convidado, String nome_grupo){
+        String query = "INSERT INTO convite (email_convidado, nome_grupo) VALUES (?, ?)";
+        try (PreparedStatement stmt = connection.prepareStatement(query)) {
+            stmt.setString(1, email_convidado);
+            stmt.setString(2, nome_grupo);
+            stmt.executeUpdate();
+            setLastQuery(query);
+            return true; // Sucesso
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return false; // Falha
         }
     }
 
@@ -434,22 +460,40 @@ public class DbManager {
         }
     }
 
-    public boolean criaConvite(String email_convidado, String nome_grupo){
-        String query = "INSERT INTO convite (email_convidado, nome_grupo) VALUES (?, ?)";
-        try (PreparedStatement stmt = connection.prepareStatement(query)) {
-            stmt.setString(1, email_convidado);
-            stmt.setString(2, nome_grupo);
-            stmt.executeUpdate();
-            setLastQuery(query);
-            return true; // Sucesso
+    public boolean eliminaConvite(String id){
+        String query1 = "DELETE FROM convite WHERE id = ? ";
+
+        try (PreparedStatement stmt1 = connection.prepareStatement(query1)) {
+            stmt1.setString(1, id);
+            stmt1.executeUpdate();
+            setLastQuery(query1);
+            incDbVersion();
+            return true;
         } catch (SQLException e) {
             e.printStackTrace();
-            return false; // Falha
+            return false;
         }
     }
 
+
 //Getters-----------------------------------------------------------------------------------------------------------------------
 
+    public String getGrupoConvite(String id){
+        String query = "SELECT nome_grupo FROM convite WHERE id = ?";
+
+        try{
+            PreparedStatement stmt = connection.prepareStatement(query);
+            stmt.setString(1,id);
+
+            ResultSet rs = stmt.executeQuery();
+
+            return rs.getString(1);
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return "";
+        }
+    }
     public ArrayList<String> listaDespesas(String grupo){
 
         String query = "SELECT * FROM despesa WHERE nome_grupo = ?";

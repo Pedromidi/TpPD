@@ -117,6 +117,9 @@ public class ClienteUI {
                 res = enviaComando(command);
                 System.out.println(res);
 
+                if(res.contains("desconectar"))
+                    exit(1);
+
                 input.nextLine(); //flush
             } else {
                 System.out.print("Email: ");

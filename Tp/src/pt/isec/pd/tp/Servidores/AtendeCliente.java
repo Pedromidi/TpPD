@@ -1,7 +1,5 @@
 package pt.isec.pd.tp.Servidores;
 
-import pt.isec.pd.tp.Convite;
-
 import java.io.*;
 import java.net.Socket;
 import java.net.SocketException;
@@ -44,6 +42,9 @@ public class AtendeCliente implements Runnable {
                 String res = VerificaComando(comando);
                 oout.writeObject(res);
                 oout.flush();
+
+                if(res.contains("desconectar"))
+                    clientSocket.close();
             }
         } catch (IOException | ClassNotFoundException e) {
             System.out.println("Problema na comunicacao com o cliente " + clientSocket.getInetAddress().getHostAddress() + ":" + clientSocket.getPort() + "\n\t" + e);
@@ -135,13 +136,11 @@ public class AtendeCliente implements Runnable {
     public String login(String[] arr) throws IOException {
 
         if(!db.verificaEmail(arr[1])){
-            clientSocket.close();
-            return "\nEmail incorreto";
+            return "\nEmail incorreto. A desconectar";
         }
         email = arr[1];
         if(!db.verificaPassword(email, arr[2])){
-            clientSocket.close();
-            return "\nPassword incorreta";
+            return "\nPassword incorreta. A desconectar";
         }
         return "Login aceite! Bem vindo " + email;
 
@@ -155,7 +154,6 @@ public class AtendeCliente implements Runnable {
         if (db.verificaTelefone(arr[3])) {
             return "\nTelefone já existente na Base de Dados.";
         }
-
         //Adicionar novo utilizador
         boolean sucesso = db.adicionaRegisto(arr[1], arr[2], arr[3], arr[4]); // arr[1] = email, arr[2] = nome, arr[3] = telefone, arr[4] = password
         if (sucesso) {
@@ -261,8 +259,9 @@ public class AtendeCliente implements Runnable {
      */
 
     public String criarConvite(String[] arr) {
-        if(!db.verificaEmail(arr[1]))
-            return "\nEmail do utilizador indicado nao existe";
+        if(!db.verificaEmail(arr[1])||db.verificaPertenceGrupo(email, arr[2]))
+            return "\nEmail do utilizador indicado nao existe ou já pertence ao grupo";
+
         if(!db.verificaPertenceGrupo(email, arr[2]))
             return "\nNão pertence a este grupo o ou grupo nao existe";
 
@@ -287,15 +286,24 @@ public class AtendeCliente implements Runnable {
      *   Aceitação e recusa de convites de adesão a grupos
      */
     public String  responderConvite (String[] arr){
-        //TODO - verifica se existe convite com o id na sua lista de convites
-        //return "\nId do convite invalido";
+        if (!db.verificaId(arr[1], "convite"))
+            return "\nId Inválido";
+
+        String grupo = db.getGrupoConvite(arr[1]);
+
         switch (arr[2]){
             case "1":
-                //TODO - adicionar cliente ao grupo do convite
+                if(db.adicionaMembro(email,grupo) && db.eliminaConvite(arr[1]))
+                    return "Entrou no grupo " + grupo + "!";
+                return "Não foi possivel aceitar o convite...";
+
             case "2":
-                //TODO -  eliminar convite
+                if(!db.eliminaConvite(arr[1]))
+                    return "Erro ao recusar convite....";
+                return "Convite do grupo " + grupo + " recusado!";
+
         }
-        return "\nAinda por implementar :D";
+        return "\n....huh...........";
     }
 
     /**
