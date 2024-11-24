@@ -5,6 +5,7 @@ import pt.isec.pd.tp.Grupo;
 
 import java.io.*;
 import java.net.*;
+import java.util.regex.Pattern;
 
 import static java.lang.System.exit;
 

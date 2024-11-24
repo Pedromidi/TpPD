@@ -1,7 +1,5 @@
 package pt.isec.pd.tp.Servidores;
 
-//import pt.isec.pd.tp.MSG;
-
 import pt.isec.pd.tp.Convite;
 
 import java.io.*;
@@ -10,11 +8,11 @@ import java.net.SocketException;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
 
 public class AtendeCliente implements Runnable {
     Socket clientSocket;
     DbManager db;
+
     String email;
     String grupoAtual;
 
@@ -227,13 +225,19 @@ public class AtendeCliente implements Runnable {
 
     public String criarGrupo(String[] arr) {
 
-        if (db.verificaGrupo(arr[1])) { // arr[1] = nome do grupo
+        StringBuilder nomeGrupo = new StringBuilder();
+        for(int i = 1; i < arr.length; i++){
+            nomeGrupo.append(arr[i]);
+            if(i != arr.length-1)  nomeGrupo.append(" ");//nao mete espaco no ultimo
+        }
+
+        if (db.verificaGrupo(nomeGrupo.toString())) { // arr[1] = nome do grupo
             return "\nNome de grupo indisponível.";
         }
 
-        boolean grupoCriado = db.criaGrupo(email, arr[1]); // email é o utilizador autenticado no sistema
+        boolean grupoCriado = db.criaGrupo(email, nomeGrupo.toString()); // email é o utilizador autenticado no sistema
         if (grupoCriado) {
-            grupoAtual = arr[1];
+            grupoAtual = nomeGrupo.toString();
             db.incDbVersion();
             return "\nGrupo criado com sucesso!";
         } else {
@@ -246,10 +250,16 @@ public class AtendeCliente implements Runnable {
      * operações que executar referem-se implicitamente a esse grupo
      */
     public String trocarGrupoAtual (String[] arr){
-        if(!db.verificaPertenceGrupo(email,arr[1]))
+
+        StringBuilder nomeGrupo = new StringBuilder();
+        for(int i = 1; i < arr.length; i++){
+            nomeGrupo.append(arr[i]);
+            if(i != arr.length-1)  nomeGrupo.append(" ");//nao mete espaco no ultimo
+        }
+        if(!db.verificaPertenceGrupo(email, nomeGrupo.toString()))
              return "\nNão pertence a este grupo o ou grupo nao existe... Tente novamente";
 
-        grupoAtual = arr[1];
+        grupoAtual = nomeGrupo.toString();
 
         return "\nGrupo atual alterado com sucesso!";
     }
@@ -306,14 +316,20 @@ public class AtendeCliente implements Runnable {
      * Edição do nome de um grupo por qualquer um dos seus elementos
      */
     public String  editarNomeGrupo(String[] arr){
+        StringBuilder nomeGrupo = new StringBuilder();
+        for(int i = 1; i < arr.length; i++){
+            nomeGrupo.append(arr[i]);
+            if(i != arr.length-1)  nomeGrupo.append(" ");//nao mete espaco no ultimo
+        }
+
         if(grupoAtual == null)
             return "Sem grupo atual selecionado. Por favor escolha um grupo";
 
-        if(db.verificaGrupo(arr[1]))
+        if(db.verificaGrupo(nomeGrupo.toString()))
             return "Nome de grupo indisponivel";
 
-        if(db.alteraNomeGrupo(arr[1], grupoAtual)){
-            grupoAtual = arr[1];
+        if(db.alteraNomeGrupo(nomeGrupo.toString(), grupoAtual)){
+            grupoAtual = nomeGrupo.toString();
             return "Nome do Grupo alterado com sucesso!";
         }
 
@@ -326,17 +342,21 @@ public class AtendeCliente implements Runnable {
      * quantia Z ao elemento Y / o elemento Y tem a receber a quantia Z do elemento Y).
      */
     public String  eliminarGrupo(String[] arr){
-        if(!db.verificaPertenceGrupo(email,arr[1]))
+        StringBuilder nomeGrupo = new StringBuilder();
+        for(int i = 1; i < arr.length; i++){
+            nomeGrupo.append(arr[i]);
+            if(i != arr.length-1)  nomeGrupo.append(" ");//nao mete espaco no ultimo
+        }
+        if(!db.verificaPertenceGrupo(email,nomeGrupo.toString()))
             return "\nNão pertence a este grupo o ou grupo nao existe... Tente novamente";
 
-        if(db.listaDespesas(arr[1]).size() > 0)
+        if(db.listaDespesas(nomeGrupo.toString()).size() > 0)
             return "\nEste grupo nao pode ser eliminado. Ainda existem despesas...";
 
-        if(db.eliminarGrupodaDB(arr[1])){
+        if(db.eliminarGrupodaDB(nomeGrupo.toString())){
             grupoAtual = null;
             return "\nGrupo eliminado com sucesso!";
         }
-
 
         return "\nOcorreu um erro ao eliminar o grupo...";
     }
@@ -345,14 +365,22 @@ public class AtendeCliente implements Runnable {
      * Saída de um grupo se ainda não existir qualquer despesa associada ao utilizador;
      */
     public String sairGrupo(String[] arr){
-        if(!db.verificaPertenceGrupo(email,arr[1]))
+        StringBuilder nomeGrupo = new StringBuilder();
+        for(int i = 1; i < arr.length; i++){
+            nomeGrupo.append(arr[i]);
+            if(i != arr.length-1)  nomeGrupo.append(" ");//nao mete espaco no ultimo
+        }
+
+        if(!db.verificaPertenceGrupo(email,nomeGrupo.toString()))
             return "\nNão pertence a este grupo o ou grupo nao existe... Tente novamente";
 
-        if(db.verificaDespesaPessoaGrupo(email,arr[1]))
+        if(db.verificaDespesaPessoaGrupo(email,nomeGrupo.toString()))
             return "\nNão pode sair do grupo. Ainda tem despesas por liquidar...";
 
-        if(db.retiraEmailGrupo(email, arr[1]))
-            return "\nSaiu do grupo " + arr[1];
+        if(db.retiraEmailGrupo(email, nomeGrupo.toString())){
+            grupoAtual = null;
+            return "\nSaiu do grupo " + nomeGrupo;
+        }
 
         return "Ocorreu um erro ao tentar sair do grupo...";
     }
@@ -446,9 +474,10 @@ public class AtendeCliente implements Runnable {
      *Exportação, para um ficheiro em formato CSV, da lista de despesas associadas ao
      *grupo corrente, ordenadas cronologicamente e detalhada (ver exemplo na Figura 1);
      */
-
-
     public String exportarDespesas(String nomeFicheiro) {
+        if (grupoAtual == null)
+            return "\nSem grupo atual selecionado. Por favor escolha um grupo.";
+
         String filePath = "../csv/" + nomeFicheiro + ".csv";
 
         try {
@@ -481,8 +510,6 @@ public class AtendeCliente implements Runnable {
             return "\nErro ao obter despesas da base de dados.";
         }
     }
-
-
 
     /**
      *Edição dos campos de uma despesa já introduzida no sistema;
