@@ -11,23 +11,6 @@ import static java.lang.System.exit;
 public class Servidor {
     String nomeFicheiro = "test";
 
-
-    //100% theory, test it at your own peril
-    public void exportarDespesasParaCSV(Grupo grupo, String nomeFicheiro){
-        try(FileWriter writer = new FileWriter(nomeFicheiro)){
-            writer.append("Data, Responsavel, Valor, Pago por, A dividir com");
-            for (Despesa despesa : grupo.getDespesas()){
-                writer.append(despesa.getData() + ",");
-                writer.append(despesa.getPagador()+ ",");
-                writer.append(despesa.getValor()+ ",");
-                writer.append(despesa.getPagador() + ",");
-                writer.append(despesa.getDivididaCom()+",");
-            } System.out.println("Despesas exportadas com sucesso!");
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
-
     public static void main(String[] args) {
         ServerSocket serverSocket;
         int listeningPort;

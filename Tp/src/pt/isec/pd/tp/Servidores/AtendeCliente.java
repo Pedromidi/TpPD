@@ -4,12 +4,12 @@ package pt.isec.pd.tp.Servidores;
 
 import pt.isec.pd.tp.Convite;
 
-import java.io.IOException;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
+import java.io.*;
 import java.net.Socket;
 import java.net.SocketException;
+import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Objects;
 
 public class AtendeCliente implements Runnable {
@@ -107,7 +107,7 @@ public class AtendeCliente implements Runnable {
                 return verHistoricoDespesas();
             }
             case "16" -> { //exportardespesas
-                return exportarDespesas();
+                return exportarDespesas(arr[1]);
             }
             case "17" -> { //17 <id> <campoAeditar> <novoValor>
                 return editarDespesa(comando, arr);
@@ -451,10 +451,41 @@ public class AtendeCliente implements Runnable {
      *Exportação, para um ficheiro em formato CSV, da lista de despesas associadas ao
      *grupo corrente, ordenadas cronologicamente e detalhada (ver exemplo na Figura 1);
      */
-    public String  exportarDespesas(){
-        //TODO servidor faz logica de exportar ja q é ele q tem acesso aos dados maybe
-        return "\n....A teoria está lá... Nao testamos ainda...";
+
+
+    public String exportarDespesas(String grupoNome) {
+        String filePath = "despesas_" + grupoNome + ".csv";
+
+        try {
+            List<String[]> despesas = db.obterDespesas(grupoNome);
+
+            if (despesas.isEmpty()) {
+                return "\nNão há despesas para exportar no grupo " + grupoNome;
+            }
+
+            // ficheiro CSV
+            try (BufferedWriter writer = new BufferedWriter(new FileWriter(filePath))) {
+                writer.write("ID,Descrição,Valor,Data,Quem Pagou");
+                writer.newLine();
+
+                for (String[] despesa : despesas) {
+                    writer.write(String.join(",", despesa));
+                    writer.newLine();
+                }
+            }
+
+            return "\nExportação bem-sucedida! Ficheiro criado: " + filePath;
+
+        } catch (IOException e) {
+            e.printStackTrace();
+            return "\nErro ao criar o ficheiro CSV.";
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return "\nErro ao obter despesas da base de dados.";
+        }
     }
+
+
 
     /**
      *Edição dos campos de uma despesa já introduzida no sistema;

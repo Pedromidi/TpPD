@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.IOException;
 import java.sql.*;
 import java.util.ArrayList;
+import java.util.List;
 
 public class DbManager {
     String dbPath;
@@ -522,6 +523,28 @@ public class DbManager {
             throw new RuntimeException(e);
         }
     }
+
+    public List<String[]> obterDespesas(String grupoNome) throws SQLException {
+        String query = "SELECT id, descricao, valor, data, quem_pagou FROM despesas WHERE grupo_nome = ?";
+        List<String[]> despesas = new ArrayList<>();
+
+        try (PreparedStatement stmt = connection.prepareStatement(query)) {
+            stmt.setString(1, grupoNome);
+            ResultSet rs = stmt.executeQuery();
+
+            while (rs.next()) {
+                String[] despesa = new String[5];
+                despesa[0] = rs.getString("id");
+                despesa[1] = rs.getString("descricao");
+                despesa[2] = rs.getString("valor");
+                despesa[3] = rs.getString("data");
+                despesa[4] = rs.getString("quem_pagou");
+                despesas.add(despesa);
+            }
+        }
+        return despesas;
+    }
+
 
 //Verificacões------------------------------------------------------------------------------------------------------------------
 
