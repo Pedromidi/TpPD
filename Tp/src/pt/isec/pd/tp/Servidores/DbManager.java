@@ -631,6 +631,26 @@ public class DbManager {
     }
 
 
+    public float CalculaTotalQueMeDevem(String grupo, String email){
+
+        String query = "SELECT SUM(valor) FROM despesa WHERE email_pagador = ? AND nome_grupo = ?";
+
+        try{
+            PreparedStatement stmt = connection.prepareStatement(query);
+            stmt.setString(1,email);
+            stmt.setString(2,grupo);
+
+            ResultSet rs = stmt.executeQuery();
+
+            return rs.getFloat(1);
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return -1;
+        }
+    }
+
+
 //Verificacões------------------------------------------------------------------------------------------------------------------
 
     /**

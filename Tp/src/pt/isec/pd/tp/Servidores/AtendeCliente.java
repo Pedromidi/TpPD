@@ -626,10 +626,10 @@ public class AtendeCliente implements Runnable {
     /**
      * Visualização dos saldos do grupo corrente com, para cada elemento, indicação do:
      *    o gasto total; ---
-     *    o valor total que deve; (todas as despesas partilhadas( ve quantos mais partilham desta depesa e divide o valor))
+     *    o valor total que deve; (todas as despesas partilhadas(ve quantos mais partilham desta depesa e divide o valor))
      *    - o valor que que deve a cada um dos restantes elementos;
-     *    o valor total que tem a receber;
-     *    o valor que tem a receber de cada um dos restantes elementos;
+     *    - o valor total que tem a receber;
+     *    - o valor que tem a receber de cada um dos restantes elementos;
      */
     public String  verSaldos(){
         if (grupoAtual == null)
@@ -643,10 +643,13 @@ public class AtendeCliente implements Runnable {
         float result2 = db.CalculaTotalDevido(grupoAtual, email);
         if(result2 < 0) return "\nNão foi possivel calcular o valor total que deve...";
 
+        float result3 = db.CalculaTotalQueMeDevem(grupoAtual, email);
+        if(result3 < 0) return "\nNão foi possivel calcular o valor total que deve receber";
 
 
         ret +=  "\nSoma das despesas do grupo: " + result + " Euros" +
-                "\nValor que deve: " + result2 + " Euros";
+                "\nValor que deve: " + result2 + " Euros" +
+                "\nValor total que tem a receber: " + result3 + " Euros";
 
         return ret;
     }
