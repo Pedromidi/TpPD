@@ -225,19 +225,15 @@ public class AtendeCliente implements Runnable {
 
     public String criarGrupo(String[] arr) {
 
-        StringBuilder nomeGrupo = new StringBuilder();
-        for(int i = 1; i < arr.length; i++){
-            nomeGrupo.append(arr[i]);
-            if(i != arr.length-1)  nomeGrupo.append(" ");//nao mete espaco no ultimo
-        }
+        String nomeGrupo = getNomeGrupo(arr);
 
-        if (db.verificaGrupo(nomeGrupo.toString())) { // arr[1] = nome do grupo
+        if (db.verificaGrupo(nomeGrupo)) { // arr[1] = nome do grupo
             return "\nNome de grupo indisponível.";
         }
 
-        boolean grupoCriado = db.criaGrupo(email, nomeGrupo.toString()); // email é o utilizador autenticado no sistema
+        boolean grupoCriado = db.criaGrupo(email, nomeGrupo); // email é o utilizador autenticado no sistema
         if (grupoCriado) {
-            grupoAtual = nomeGrupo.toString();
+            grupoAtual = nomeGrupo;
             db.incDbVersion();
             return "\nGrupo criado com sucesso!";
         } else {
@@ -250,16 +246,11 @@ public class AtendeCliente implements Runnable {
      * operações que executar referem-se implicitamente a esse grupo
      */
     public String trocarGrupoAtual (String[] arr){
-
-        StringBuilder nomeGrupo = new StringBuilder();
-        for(int i = 1; i < arr.length; i++){
-            nomeGrupo.append(arr[i]);
-            if(i != arr.length-1)  nomeGrupo.append(" ");//nao mete espaco no ultimo
-        }
-        if(!db.verificaPertenceGrupo(email, nomeGrupo.toString()))
+        String nomeGrupo = getNomeGrupo(arr);
+        if(!db.verificaPertenceGrupo(email, nomeGrupo))
              return "\nNão pertence a este grupo o ou grupo nao existe... Tente novamente";
 
-        grupoAtual = nomeGrupo.toString();
+        grupoAtual = nomeGrupo;
 
         return "\nGrupo atual alterado com sucesso!";
     }
@@ -316,20 +307,16 @@ public class AtendeCliente implements Runnable {
      * Edição do nome de um grupo por qualquer um dos seus elementos
      */
     public String  editarNomeGrupo(String[] arr){
-        StringBuilder nomeGrupo = new StringBuilder();
-        for(int i = 1; i < arr.length; i++){
-            nomeGrupo.append(arr[i]);
-            if(i != arr.length-1)  nomeGrupo.append(" ");//nao mete espaco no ultimo
-        }
+        String nomeGrupo = getNomeGrupo(arr);
 
         if(grupoAtual == null)
             return "Sem grupo atual selecionado. Por favor escolha um grupo";
 
-        if(db.verificaGrupo(nomeGrupo.toString()))
+        if(db.verificaGrupo(nomeGrupo))
             return "Nome de grupo indisponivel";
 
-        if(db.alteraNomeGrupo(nomeGrupo.toString(), grupoAtual)){
-            grupoAtual = nomeGrupo.toString();
+        if(db.alteraNomeGrupo(nomeGrupo, grupoAtual)){
+            grupoAtual = nomeGrupo;
             return "Nome do Grupo alterado com sucesso!";
         }
 
@@ -342,18 +329,15 @@ public class AtendeCliente implements Runnable {
      * quantia Z ao elemento Y / o elemento Y tem a receber a quantia Z do elemento Y).
      */
     public String  eliminarGrupo(String[] arr){
-        StringBuilder nomeGrupo = new StringBuilder();
-        for(int i = 1; i < arr.length; i++){
-            nomeGrupo.append(arr[i]);
-            if(i != arr.length-1)  nomeGrupo.append(" ");//nao mete espaco no ultimo
-        }
-        if(!db.verificaPertenceGrupo(email,nomeGrupo.toString()))
+        String nomeGrupo = getNomeGrupo(arr);
+
+        if(!db.verificaPertenceGrupo(email,nomeGrupo))
             return "\nNão pertence a este grupo o ou grupo nao existe... Tente novamente";
 
-        if(db.listaDespesas(nomeGrupo.toString()).size() > 0)
+        if(db.listaDespesas(nomeGrupo).size() > 0)
             return "\nEste grupo nao pode ser eliminado. Ainda existem despesas...";
 
-        if(db.eliminarGrupodaDB(nomeGrupo.toString())){
+        if(db.eliminarGrupodaDB(nomeGrupo)){
             grupoAtual = null;
             return "\nGrupo eliminado com sucesso!";
         }
@@ -365,19 +349,15 @@ public class AtendeCliente implements Runnable {
      * Saída de um grupo se ainda não existir qualquer despesa associada ao utilizador;
      */
     public String sairGrupo(String[] arr){
-        StringBuilder nomeGrupo = new StringBuilder();
-        for(int i = 1; i < arr.length; i++){
-            nomeGrupo.append(arr[i]);
-            if(i != arr.length-1)  nomeGrupo.append(" ");//nao mete espaco no ultimo
-        }
+        String nomeGrupo = getNomeGrupo(arr);
 
-        if(!db.verificaPertenceGrupo(email,nomeGrupo.toString()))
+        if(!db.verificaPertenceGrupo(email,nomeGrupo))
             return "\nNão pertence a este grupo o ou grupo nao existe... Tente novamente";
 
-        if(db.verificaDespesaPessoaGrupo(email,nomeGrupo.toString()))
+        if(db.verificaDespesaPessoaGrupo(email,nomeGrupo))
             return "\nNão pode sair do grupo. Ainda tem despesas por liquidar...";
 
-        if(db.retiraEmailGrupo(email, nomeGrupo.toString())){
+        if(db.retiraEmailGrupo(email, nomeGrupo)){
             grupoAtual = null;
             return "\nSaiu do grupo " + nomeGrupo;
         }
@@ -389,7 +369,6 @@ public class AtendeCliente implements Runnable {
      *Inserção de uma despesa associada ao grupo corrente, por qualquer um dos seus
      * elementos, com: data; descrição; valor; quem pagou; e os elementos com quem é
      * partilhada (pode não incluir quem pagou);
-     *
      * (arr) 1-valor, 2-data, 3-quemPagou
      */
     public String  inserirDespesa(String comando, String[] arr){
@@ -397,7 +376,7 @@ public class AtendeCliente implements Runnable {
         String[] ast = comando.split(";"); //ast[1] -> partilhados, ast[2]-> descricao
 
         ast[1] = ast[1].toLowerCase();
-        String partilhados[] = ast[1].split(" ");
+        String[] partilhados = ast[1].split(" ");
 
         if(grupoAtual == null)
             return "Sem grupo atual selecionado. Por favor escolha um grupo";
@@ -414,7 +393,7 @@ public class AtendeCliente implements Runnable {
         boolean uh = false;
         for (String email_partilha: partilhados) {
             if(!db.verificaPertenceGrupo(email_partilha,grupoAtual)||!db.adicionaDespesaPartilhada(""+id, email_partilha)){
-                quemNaodeu.append("\n - " + email_partilha);
+                quemNaodeu.append("\n - ").append(email_partilha);
                 uh = true;
             }
         }
@@ -522,50 +501,53 @@ public class AtendeCliente implements Runnable {
 
         String[] ast = comando.split(";");
 
-        String partilhados[] = ast[1].split(" ");
+        String[] partilhados = ast[1].split(" ");
 
-        switch (arr[2]){
-            case "1":
-                if(db.alteraCampoDespesa(arr[1], "data",ast[1]))
+        switch (arr[2]) {
+            case "1" -> {
+                if (db.alteraCampoDespesa(arr[1], "data", ast[1]))
                     return "\nData alterada com sucesso!";
                 return "\nNão foi possivel alterar a data";
-            case "2":
-                if(db.alteraCampoDespesa(arr[1], "descricao",ast[1]))
+            }
+            case "2" -> {
+                if (db.alteraCampoDespesa(arr[1], "descricao", ast[1]))
                     return "\nDescrição alterada com sucesso!";
                 return "\nNão foi possivel alterar a descrição";
-            case "3":
-                if(db.alteraCampoDespesa(arr[1], "valor",ast[1]))
+            }
+            case "3" -> {
+                if (db.alteraCampoDespesa(arr[1], "valor", ast[1]))
                     return "\nDescrição alterada com sucesso!";
                 return "\nNão foi possivel alterar a descrição";
-            case "4":
-                if(!db.verificaPertenceGrupo(arr[3],grupoAtual))
+            }
+            case "4" -> {
+                if (!db.verificaPertenceGrupo(arr[3], grupoAtual))
                     return "\nEmail incorreto";
-
-                if(db.alteraCampoDespesa(arr[1], "email_pagador",ast[1]))
+                if (db.alteraCampoDespesa(arr[1], "email_pagador", ast[1]))
                     return "\nEmail alterada com sucesso!";
                 return "\nNão foi possivel alterar o email";
-
-            case "5":
+            }
+            case "5" -> {
                 StringBuilder quemNaodeu = new StringBuilder("\nNão foi partilhada a despesa com o(s) email(s):");
                 boolean uh = false;
-                for (String email_partilha: partilhados) {
-                    if(!db.verificaPertenceGrupo(email_partilha,grupoAtual)||!db.adicionaDespesaPartilhada(arr[1], email_partilha)){
-                        quemNaodeu.append("\n - " + email_partilha);
+                for (String email_partilha : partilhados) {
+                    if (!db.verificaPertenceGrupo(email_partilha, grupoAtual) || !db.adicionaDespesaPartilhada(arr[1], email_partilha)) {
+                        quemNaodeu.append("\n - ").append(email_partilha);
                         uh = true;
                     }
                 }
-                return  (uh ? quemNaodeu.toString() : "\nPartilha alterada com sucesso!");
-
-            case "6":
+                return (uh ? quemNaodeu.toString() : "\nPartilha alterada com sucesso!");
+            }
+            case "6" -> {
                 StringBuilder quemNaodeu2 = new StringBuilder("\nNão foram retiradas as partilhas com os emails:");
                 boolean uh2 = false;
-                for (String email_partilha: partilhados) {
-                    if(!db.verificaPertenceGrupo(email_partilha,grupoAtual)||!db.removeDespesaPartilhada(arr[1], email_partilha)){
-                        quemNaodeu2.append("\n - " + email_partilha);
+                for (String email_partilha : partilhados) {
+                    if (!db.verificaPertenceGrupo(email_partilha, grupoAtual) || !db.removeDespesaPartilhada(arr[1], email_partilha)) {
+                        quemNaodeu2.append("\n - ").append(email_partilha);
                         uh2 = true;
                     }
                 }
-                return  (uh2 ? quemNaodeu2.toString() : "\nPartilha alterada com sucesso!");
+                return (uh2 ? quemNaodeu2.toString() : "\nPartilha alterada com sucesso!");
+            }
         }
         return "\nCampo alterado com sucesso!";
     }
@@ -648,5 +630,14 @@ public class AtendeCliente implements Runnable {
     public String  verSaldos(){
         //TODO calcular saldos. Ir a BD no grupo atual
         return "Gastos total do grupo: Ainda nao sei :(";
+    }
+
+    private String getNomeGrupo(String [] arr){
+        StringBuilder nomeGrupo = new StringBuilder();
+        for(int i = 1; i < arr.length; i++){
+            nomeGrupo.append(arr[i]);
+            if(i != arr.length-1)  nomeGrupo.append(" ");//nao mete espaco no ultimo
+        }
+        return nomeGrupo.toString();
     }
 }

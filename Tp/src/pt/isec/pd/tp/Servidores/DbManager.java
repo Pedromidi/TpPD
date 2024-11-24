@@ -290,7 +290,7 @@ public class DbManager {
      * @return
      */
     public boolean alteraNomeGrupo(String novoNome,String oldNome) { //nao funfa
-        String query = "UPDATE grupo SET nome = ? WHERE nome = ?";
+        String query = "UPDATE grupo SET nome = ? WHERE nome = ?;";
         try{
             PreparedStatement stmt = connection.prepareStatement(query);
             stmt.setString(1, novoNome);
