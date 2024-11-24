@@ -268,9 +268,10 @@ public class ClienteUI {
                     case 4 -> {
                         System.out.print("\nEmail do destinatário: ");
                         String email = input.next();
-
+                        System.out.print("\nGrupo a convidar: ");
+                        String grupo = input.next();
                         //enviar ao server como criacao de novo convite - Codigo 6
-                        command = "6 " + email;
+                        command = "6 " + email + " " + grupo;
                         res = enviaComando(command);
                         System.out.println(res);
                     }

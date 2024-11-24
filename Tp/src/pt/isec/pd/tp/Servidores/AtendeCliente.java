@@ -259,15 +259,17 @@ public class AtendeCliente implements Runnable {
      *  Criação de convites para adesão a um grupo, sendo os destinatários identificados
      *  através dos seus emails de registo no sistema
      */
+
     public String criarConvite(String[] arr) {
+        if(!db.verificaEmail(arr[1]))
+            return "\nEmail do utilizador indicado nao existe";
+        if(!db.verificaPertenceGrupo(email, arr[2]))
+            return "\nNão pertence a este grupo o ou grupo nao existe";
 
-        String emailDestinatario = arr[1];
-        if (!db.verificaEmail(emailDestinatario)) {
-            return "\nEmail do destinatário inválido";
-        }
+        if(!db.criaConvite(arr[1], arr[2]))
+            return "\nNão foi possível criar convite!";
 
-        Convite convite = new Convite(email, emailDestinatario, "Pendente");
-
+        db.incDbVersion();
         return "\nConvite criado com sucesso!";
     }
 

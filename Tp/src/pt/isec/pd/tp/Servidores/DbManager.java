@@ -434,6 +434,20 @@ public class DbManager {
         }
     }
 
+    public boolean criaConvite(String email_convidado, String nome_grupo){
+        String query = "INSERT INTO convite (email_convidado, nome_grupo) VALUES (?, ?)";
+        try (PreparedStatement stmt = connection.prepareStatement(query)) {
+            stmt.setString(1, email_convidado);
+            stmt.setString(2, nome_grupo);
+            stmt.executeUpdate();
+            setLastQuery(query);
+            return true; // Sucesso
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return false; // Falha
+        }
+    }
+
 //Getters-----------------------------------------------------------------------------------------------------------------------
 
     public ArrayList<String> listaDespesas(String grupo){
