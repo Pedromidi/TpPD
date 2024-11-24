@@ -365,7 +365,9 @@ public class ClienteUI {
                         }
                         case 14 -> {
                             //enviar ao server como exportar historico das despesas- Codigo 16
-                            command = "16";
+                            System.out.print("Nome ficheiro: ");
+                            String nome = input.next();
+                            command = "16 " + nome;
                             res = enviaComando(command);
                             System.out.println(res);
                         }

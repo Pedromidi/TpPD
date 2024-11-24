@@ -53,10 +53,8 @@ public class AtendeCliente implements Runnable {
     }
 
     public String VerificaComando(String comando) throws IOException {
-        //login
-        comando = comando.toLowerCase();
+
         String[] arr = comando.split(" ");
-        //String firstWord = arr[0];
 
         switch (arr[0]) {
             case "1" -> { //1 <email> <password>
@@ -269,7 +267,6 @@ public class AtendeCliente implements Runnable {
 
         Convite convite = new Convite(email, emailDestinatario, "Pendente");
 
-
         return "\nConvite criado com sucesso!";
     }
 
@@ -324,7 +321,7 @@ public class AtendeCliente implements Runnable {
     }
 
     /**
-     * Eliminação de um grupo e respetivos dados, desde que não exista qualquer conta por
+     * Eliminar grupo e respetivos dados, desde que não exista qualquer conta por
      * saldar/valor em dívida (ou seja, não podem existir situações de o elemento X deve a
      * quantia Z ao elemento Y / o elemento Y tem a receber a quantia Z do elemento Y).
      */
@@ -366,7 +363,6 @@ public class AtendeCliente implements Runnable {
      * partilhada (pode não incluir quem pagou);
      *
      * (arr) 1-valor, 2-data, 3-quemPagou
-     * ()
      */
     public String  inserirDespesa(String comando, String[] arr){
         // valor data quem ;comQuemm;descricao
@@ -374,7 +370,6 @@ public class AtendeCliente implements Runnable {
 
         ast[1] = ast[1].toLowerCase();
         String partilhados[] = ast[1].split(" ");
-
 
         if(grupoAtual == null)
             return "Sem grupo atual selecionado. Por favor escolha um grupo";
@@ -453,27 +448,29 @@ public class AtendeCliente implements Runnable {
      */
 
 
-    public String exportarDespesas(String grupoNome) {
-        String filePath = "despesas_" + grupoNome + ".csv";
+    public String exportarDespesas(String nomeFicheiro) {
+        String filePath = "../csv/" + nomeFicheiro + ".csv";
 
         try {
-            List<String[]> despesas = db.obterDespesas(grupoNome);
+            List<String[]> despesas = db.obterDespesas(grupoAtual);
 
             if (despesas.isEmpty()) {
-                return "\nNão há despesas para exportar no grupo " + grupoNome;
+                return "\nNão há despesas para exportar no grupo " + grupoAtual;
             }
 
             // ficheiro CSV
             try (BufferedWriter writer = new BufferedWriter(new FileWriter(filePath))) {
-                writer.write("ID,Descrição,Valor,Data,Quem Pagou");
+                writer.write(grupoAtual);
+                writer.newLine();
+                writer.newLine();
+                writer.write("ID;Data;Valor;Quem Pagou;Descrição;Partilhas");
                 writer.newLine();
 
                 for (String[] despesa : despesas) {
-                    writer.write(String.join(",", despesa));
+                    writer.write(String.join(";", despesa));
                     writer.newLine();
                 }
             }
-
             return "\nExportação bem-sucedida! Ficheiro criado: " + filePath;
 
         } catch (IOException e) {
@@ -546,9 +543,8 @@ public class AtendeCliente implements Runnable {
         return "\nCampo alterado com sucesso!";
     }
 
-
     /**
-     * Eliminação de uma despesa;
+     * Eliminar uma despesa;
      */
     public String  eliminarDespesa(String[] arr){
         if(!db.verificaId(arr[1], "despesa"))
@@ -556,7 +552,6 @@ public class AtendeCliente implements Runnable {
         if(db.eliminarDespesa(arr[1]))
             return "\nDespesa eliminada com sucesso";
         return "\n Nao foi possivel eliminar a pagamento";
-
     }
 
     /**
@@ -590,7 +585,6 @@ public class AtendeCliente implements Runnable {
             return "\nNão foi possível adicionar o pagamento. Por favor, tenta novamente.";
         }
     }
-
 
     /**
      * Listagem dos pagamentos efetuados entre elementos do grupo;

@@ -525,20 +525,32 @@ public class DbManager {
     }
 
     public List<String[]> obterDespesas(String grupoNome) throws SQLException {
-        String query = "SELECT id, descricao, valor, data, quem_pagou FROM despesas WHERE grupo_nome = ?";
+        String query = "SELECT id, descricao, valor, data, email_pagador FROM despesa WHERE nome_grupo = ?";
+        String query_partilhados = "SELECT email FROM despesa_partilhada WHERE id_despesa = ?";
         List<String[]> despesas = new ArrayList<>();
 
-        try (PreparedStatement stmt = connection.prepareStatement(query)) {
+        try (PreparedStatement stmt = connection.prepareStatement(query);
+             PreparedStatement stmt_partilhados = connection.prepareStatement(query_partilhados);) {
+
             stmt.setString(1, grupoNome);
             ResultSet rs = stmt.executeQuery();
 
             while (rs.next()) {
-                String[] despesa = new String[5];
-                despesa[0] = rs.getString("id");
-                despesa[1] = rs.getString("descricao");
+                String[] despesa = new String[6];
+                despesa[0] = ""+rs.getInt("id");
+                despesa[1] = rs.getString("data");
                 despesa[2] = rs.getString("valor");
-                despesa[3] = rs.getString("data");
-                despesa[4] = rs.getString("quem_pagou");
+                despesa[3] = rs.getString("email_pagador");
+                despesa[4] = rs.getString("descricao");
+
+                //vai buscar emails partilhados
+                stmt_partilhados.setString(1,despesa[0]);
+                ResultSet rs_partilhados = stmt_partilhados.executeQuery();
+                despesa[5] = "";
+                while(rs_partilhados.next()){
+                    despesa[5] += rs_partilhados.getString(1)+ " ";
+                }
+
                 despesas.add(despesa);
             }
         }
