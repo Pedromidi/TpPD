@@ -30,9 +30,10 @@ public class DbManager {
             connection.setAutoCommit(true);
 
             if(connection == null) return "Falha na Conexão a Base de Dados";
-
             criaTabelasBD();
 
+            Statement stmt = connection.createStatement(); //No SQLite, as chaves estrangeiras estão desativadas por padrão. Mesmo que as relações sejam definidas corretamente, elas não terão efeito se as chaves estrangeiras não estiverem ativadas.
+            stmt.execute("PRAGMA foreign_keys = ON;");
             return "Conexão com a Base de Dados estabelecida!";
 
         } catch (SQLException e) { //se não conseguir conetar
