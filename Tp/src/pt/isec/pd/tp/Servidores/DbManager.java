@@ -505,6 +505,29 @@ public class DbManager {
             throw new RuntimeException(e);
         }
     }
+
+    public String listaConvites(String email){
+        String query = "SELECT * FROM convite WHERE email_convidado = ?";
+
+        try{
+            PreparedStatement stmt = connection.prepareStatement(query);
+            stmt.setString(1,email);
+
+            ResultSet rs = stmt.executeQuery();
+
+            StringBuilder convites = new StringBuilder();
+            while(rs.next()){
+                convites.append("\n - ").append(rs.getInt("id")).append(", ").append(rs.getString("nome_grupo"));
+            }
+
+            return convites.toString();
+
+        }catch(SQLException e) {
+            throw new RuntimeException(e);
+        }
+
+
+    }
     public List<String[]> obterDespesas(String grupoNome) throws SQLException {
         String query = "SELECT id, descricao, valor, data, email_pagador FROM despesa WHERE nome_grupo = ?";
         String query_partilhados = "SELECT email FROM despesa_partilhada WHERE id_despesa = ?";

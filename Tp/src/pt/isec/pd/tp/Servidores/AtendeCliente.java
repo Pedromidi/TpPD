@@ -275,8 +275,10 @@ public class AtendeCliente implements Runnable {
      *     Visualização automática e atualizada dos convites de adesão recebidos/pendentes
      */
     public String verConvites (){
-        //TODO listar convites
-        return "Ainda por implementar :)";
+
+        String lista = db.listaConvites(email);
+
+        return "\nConvites: " + (lista.equals("")?"Não há convites a listar...": lista);
     }
 
     /**
@@ -637,6 +639,9 @@ public class AtendeCliente implements Runnable {
         if(result < 0) return "\nNão foi possivel calcular o valor da soma das Despesas...";
 
         float result2 = db.CalculaTotalDevido(grupoAtual, email);
+        if(result2 < 0) return "\nNão foi possivel calcular o valor total que deve...";
+
+
 
         ret +=  "\nSoma das despesas do grupo: " + result + " Euros" +
                 "\nValor que deve: " + result2 + " Euros";
